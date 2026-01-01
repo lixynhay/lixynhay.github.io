@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg: #020617;
-      --card: #020617;
+      --card: rgba(2,6,23,0.9);
       --text: #e5e7eb;
       --muted: #94a3b8;
       --accent: #60a5fa;
@@ -15,7 +15,7 @@
     }
     body.light {
       --bg: #f8fafc;
-      --card: #ffffff;
+      --card: rgba(255,255,255,0.9);
       --text: #020617;
       --muted: #475569;
       --accent: #2563eb;
@@ -49,6 +49,9 @@
     .card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 35px 60px rgba(0,0,0,0.25); filter: brightness(1.05); backdrop-filter: blur(8px); }
     a { color: var(--accent); text-decoration: none; }
     footer { text-align: center; padding: 30px; color: var(--muted); font-size: 0.9rem; }
+    .filter { margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .filter button { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; background: var(--card); color: var(--text); transition: all 0.3s; }
+    .filter button.active { background: var(--accent); color: #fff; }
   </style>
 </head>
 <body>
@@ -85,7 +88,7 @@
     <div class="grid">
       <div class="card">
         <h3 data-ru="Обо мне" data-en="About me"></h3>
-        <p data-ru="Инженер и исследователь систем: Linux, Android, ESP32, микроконтроллеры. Люблю разбирать системы до последней детали." data-en="Engineer & Systems Researcher: Linux, Android, ESP32, microcontrollers. Enjoy dissecting systems in depth."></p>
+        <p data-ru="Я увлечённый инженер и исследователь систем: Linux, Android, электроника, программирование. Люблю разбирать системы до последней детали, находить скрытые баги и понимать, как всё работает." data-en="I am a passionate engineer and system researcher: Linux, Android, electronics, programming. I love dissecting systems, finding hidden bugs, and understanding how everything works."></p>
       </div>
       <div class="card">
         <h3 data-ru="Навыки" data-en="Skills"></h3>
@@ -105,6 +108,7 @@
   </section>
 
   <section id="projects">
+    <div class="filter" id="projectFilters"></div>
     <div class="grid" id="projectsGrid"></div>
   </section>
 
@@ -122,99 +126,89 @@
 <footer>© 2026 • LixynHay</footer>
 
 <script>
-  // Typed effect
-  const typedText = "Привет!";
-  const typedEl = document.getElementById('typed');
-  let i = 0;
-  function typeWriter() {
-    if(i < typedText.length){
-      typedEl.innerHTML += typedText.charAt(i);
-      i++;
-      setTimeout(typeWriter, 120);
-    }
-  }
-  typeWriter();
+// Typed effect
+const typedText = "Hello!";
+const typedEl = document.getElementById('typed');
+let i = 0;
+function typeWriter(){if(i<typedText.length){typedEl.innerHTML+=typedText.charAt(i);i++;setTimeout(typeWriter,120);}}
+typeWriter();
 
-  // Parallax header on scroll
-  window.addEventListener('scroll',()=>{
-    const scrollY=window.scrollY;
-    document.querySelector('header h1').style.transform=`translateY(${scrollY*0.3}px)`;
-    document.querySelector('header p').style.transform=`translateY(${scrollY*0.2}px)`;
+// Parallax header
+window.addEventListener('scroll',()=>{
+ const scrollY=window.scrollY;
+ document.querySelector('header h1').style.transform=`translateY(${scrollY*0.3}px)`;
+ document.querySelector('header p').style.transform=`translateY(${scrollY*0.2}px)`;
+});
+
+// Sections
+function showSection(id){document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// Language
+function setLang(lang){document.querySelectorAll('[data-ru]').forEach(el=>el.textContent=el.dataset[lang]);}
+setLang('ru');
+
+// Theme
+function toggleTheme(){document.body.classList.toggle('light');}
+
+// CV download
+function downloadCV(){
+ const text=`LixynHay\nEngineer & Systems Researcher\n\nSkills:\n- Linux Kernel & Drivers\n- ESP32 / Arduino\n- C / C++ Programming\n- Debugging & Log Analysis\n- Hardware & Soldering\n\nGitHub: github.com/lixynhay`;
+ const blob=new Blob([text],{type:'text/plain'});
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(blob);
+ a.download='LixynHay_CV.txt';
+ a.click();
+}
+
+// GitHub projects
+const projectsGrid=document.getElementById('projectsGrid');
+const filtersDiv=document.getElementById('projectFilters');
+let allRepos=[];
+fetch('https://api.github.com/users/lixynhay/repos')
+.then(res=>res.json())
+.then(repos=>{
+  allRepos=repos.filter(r=>!r.fork);
+  populateFilters();
+  showProjects();
+});
+
+function populateFilters(){
+  let langs=[...new Set(allRepos.map(r=>r.language).filter(l=>l))];
+  langs.unshift('All');
+  langs.forEach(l=>{
+    const btn=document.createElement('button');
+    btn.textContent=l;
+    btn.className=l==='All'?'active':'';
+    btn.onclick=()=>{document.querySelectorAll('.filter button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');showProjects(l);};
+    filtersDiv.appendChild(btn);
   });
+}
 
-  // Sections
-  function showSection(id){
-    document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-
-  // Language
-  function setLang(lang){
-    document.querySelectorAll('[data-ru]').forEach(el=>el.textContent=el.dataset[lang]);
-  }
-  setLang('ru');
-
-  // Theme
-  function toggleTheme(){
-    document.body.classList.toggle('light');
-  }
-
-  // CV download
-  function downloadCV(){
-    const text = `LixynHay\nEngineer & Systems Researcher\n\nSkills:\n- Linux Kernel & Drivers\n- ESP32 / Arduino\n- C / C++ Programming\n- Debugging & Log Analysis\n- Hardware & Soldering\n\nGitHub: github.com/lixynhay`;
-    const blob = new Blob([text],{type:'text/plain'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download='LixynHay_CV.txt';
-    a.click();
-  }
-
-  // GitHub projects
-  fetch('https://api.github.com/users/lixynhay/repos')
-    .then(res=>res.json())
-    .then(repos=>{
-      const grid=document.getElementById('projectsGrid');
-      repos.filter(r=>!r.fork).sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,6)
-      .forEach(repo=>{
-        const card=document.createElement('div');
-        card.className='card';
-        card.innerHTML=`<h3>⭐ ${repo.name}</h3><p>${repo.description||'Без описания'}</p><p>🧠 ${repo.language||'—'} | ⭐ ${repo.stargazers_count}</p><a href="${repo.html_url}" target="_blank">Открыть →</a>`;
-        grid.appendChild(card);
-      });
-    });
-
-  // Scroll reveal
-  const sections=document.querySelectorAll('section');
-  window.addEventListener('scroll',()=>{
-    const scrollY=window.scrollY+window.innerHeight*0.75;
-    sections.forEach(sec=>{
-      if(sec.offsetTop<scrollY){sec.classList.add('active');}
-    });
+function showProjects(lang='All'){
+  projectsGrid.innerHTML='';
+  allRepos.filter(r=>lang==='All'||r.language===lang).sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,12).forEach(repo=>{
+    const card=document.createElement('div');
+    card.className='card';
+    card.innerHTML=`<h3>⭐ ${repo.name}</h3><p>${repo.description||'Без описания'}</p><p>🧠 ${repo.language||'—'} | ⭐ ${repo.stargazers_count}</p><a href='${repo.html_url}' target='_blank'>Открыть →</a>`;
+    projectsGrid.appendChild(card);
   });
+}
 
-  // Gradient particles background with cursor interaction
-  const c=document.getElementById('bg');
-  const ctx=c.getContext('2d');
-  let w,h,particles,mouse={x:null,y:null};
-  window.addEventListener('mousemove',e=>{mouse.x=e.clientX; mouse.y=e.clientY;});
+// Scroll reveal
+const sections=document.querySelectorAll('section');
+window.addEventListener('scroll',()=>{
+  const scrollY=window.scrollY+window.innerHeight*0.75;
+  sections.forEach(sec=>{if(sec.offsetTop<scrollY){sec.classList.add('active');}});
+});
 
-  function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;
-    particles=Array.from({length:80},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2+1,v:Math.random()*0.6+0.2,hue:Math.random()*360}));}
-  function draw(){
-    ctx.clearRect(0,0,w,h);
-    particles.forEach(p=>{
-      p.y+=p.v;if(p.y>h)p.y=0;
-      ctx.beginPath();
-      let dx = mouse.x-p.x, dy = mouse.y-p.y;
-      let dist=Math.sqrt(dx*dx+dy*dy);
-      let radius=p.r+(dist<100?20*(1-dist/100):0);
-      ctx.fillStyle=`hsl(${p.hue},70%,60%)`;
-      ctx.arc(p.x,p.y,radius,0,Math.PI*2);
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-  resize();draw();window.onresize=resize;
+// Gradient particles with cursor
+const c=document.getElementById('bg');
+const ctx=c.getContext('2d');
+let w,h,particles,mouse={x:null,y:null};
+window.addEventListener('mousemove',e=>{mouse.x=e.clientX; mouse.y=e.clientY;});
+function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;particles=Array.from({length:80},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2+1,v:Math.random()*0.6+0.2,hue:Math.random()*360}));}
+function draw(){ctx.clearRect(0,0,w,h);particles.forEach(p=>{p.y+=p.v;if(p.y>h)p.y=0;ctx.beginPath();let dx=mouse.x-p.x,dy=mouse.y-p.y;let dist=Math.sqrt(dx*dx+dy*dy);let radius=p.r+(dist<100?20*(1-dist/100):0);ctx.fillStyle=`hsl(${p.hue},70%,60%)`;ctx.arc(p.x,p.y,radius,0,Math.PI*2);ctx.fill();});requestAnimationFrame(draw);}
+resize();draw();window.onresize=resize;
 </script>
 
 </body>
