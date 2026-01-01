@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Дима — портфолио</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LixynHay — Портфолио</title>
   <style>
     :root {
       --bg: #020617;
@@ -12,8 +11,8 @@
       --text: #e5e7eb;
       --muted: #94a3b8;
       --accent: #60a5fa;
+      --transition: 0.5s ease;
     }
-
     body.light {
       --bg: #f8fafc;
       --card: #ffffff;
@@ -21,127 +20,40 @@
       --muted: #475569;
       --accent: #2563eb;
     }
-
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       font-family: Inter, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
+      scroll-behavior: smooth;
+      transition: background var(--transition), color var(--transition);
       overflow-x: hidden;
     }
-
-    /* particles */
-    canvas {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-    }
-
-    header {
-      padding: 90px 20px 60px;
-      text-align: center;
-      animation: fadeDown 1s ease;
-    }
-
+    canvas { position: fixed; inset: 0; z-index: -1; }
+    header { padding: 90px 20px 60px; text-align: center; }
     header h1 { font-size: 3rem; margin: 0; }
-    header p { color: var(--muted); }
-
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 25px;
-      margin-bottom: 40px;
-    }
-
-    nav button {
-      background: none;
-      border: none;
-      color: var(--accent);
-      cursor: pointer;
-      font-size: 1rem;
-      position: relative;
-    }
-
-    nav button::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      bottom: -6px;
-      width: 0;
-      height: 2px;
-      background: var(--accent);
-      transition: 0.3s;
-    }
-
+    header p { color: var(--muted); font-size: 1.2rem; }
+    nav { display: flex; justify-content: center; gap: 25px; margin-bottom: 40px; }
+    nav button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 1rem; position: relative; }
+    nav button::after { content: ""; position: absolute; left: 0; bottom: -6px; width: 0; height: 2px; background: var(--accent); transition: 0.3s; }
     nav button:hover::after { width: 100%; }
-
-    .controls {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      display: flex;
-      gap: 10px;
-      z-index: 10;
-    }
-
-    .controls button {
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: 1px solid #cbd5f5;
-      background: var(--card);
-      color: var(--text);
-      cursor: pointer;
-    }
-
-    .container {
-      max-width: 1000px;
-      margin: 0 auto 80px;
-      padding: 0 20px;
-    }
-
-    section { display: none; animation: fadeUp 0.6s ease; }
-    section.active { display: block; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 25px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 18px;
-      padding: 25px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-      transition: transform 0.3s ease;
-    }
-
-    .card:hover { transform: translateY(-6px); }
-
-    footer {
-      text-align: center;
-      padding: 30px;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .controls { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 10; }
+    .controls button { padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5f5; background: var(--card); color: var(--text); cursor: pointer; transition: all var(--transition); }
+    .controls button:hover { transform: scale(1.1); }
+    .container { max-width: 1000px; margin: 0 auto 80px; padding: 0 20px; }
+    section { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+    section.active { opacity: 1; transform: translateY(0); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
+    .card { background: var(--card); border-radius: 18px; padding: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); transition: transform 0.5s ease, box-shadow 0.5s ease, background 0.5s ease, filter 0.5s ease; }
+    .card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 35px 60px rgba(0,0,0,0.25); filter: brightness(1.05); }
+    a { color: var(--accent); text-decoration: none; }
+    footer { text-align: center; padding: 30px; color: var(--muted); font-size: 0.9rem; }
   </style>
 </head>
 <body>
 
 <canvas id="bg"></canvas>
-
 <div class="controls">
   <button onclick="toggleTheme()">🌓</button>
   <button onclick="setLang('ru')">RU</button>
@@ -149,9 +61,9 @@
   <button onclick="downloadCV()">CV</button>
 </div>
 
-<header data-speed="0.3">
-  <h1 data-ru="Привет, я Дима" data-en="Hi, I'm Dima"></h1>
-  <p data-ru="Программист • Метеоролог • Химик" data-en="Developer • Meteorologist • Chemist"></p>
+<header>
+  <h1 id="typed"></h1>
+  <p data-ru="Инженер и исследователь систем" data-en="Engineer & Systems Researcher"></p>
 </header>
 
 <nav>
@@ -162,144 +74,135 @@
 </nav>
 
 <div class="container">
-
-<section id="home" class="active">
-  <div class="card">
-    <h2 data-ru="Портфолио" data-en="Portfolio"></h2>
-    <p data-ru="Современное портфолио с анимациями и интерактивом." 
-       data-en="A modern interactive portfolio."></p>
-  </div>
-</section>
-
-<section id="about">
-  <div class="grid">
+  <section id="home" class="active">
     <div class="card">
-      <h3 data-ru="Обо мне" data-en="About me"></h3>
-      <p data-ru="Разрабатываю проекты, люблю науку и эксперименты." 
-         data-en="I build projects and love science."></p>
+      <h2 data-ru="Портфолио" data-en="Portfolio"></h2>
+      <p data-ru="Современное портфолио с интерактивными проектами и анимациями." data-en="A modern interactive portfolio with projects and animations."></p>
     </div>
+  </section>
+
+  <section id="about">
+    <div class="grid">
+      <div class="card">
+        <h3 data-ru="Обо мне" data-en="About me"></h3>
+        <p data-ru="Инженер и исследователь систем: Linux, Android, ESP32, микроконтроллеры. Люблю разбирать системы до последней детали." data-en="Engineer & Systems Researcher: Linux, Android, ESP32, microcontrollers. Enjoy dissecting systems in depth."></p>
+      </div>
+      <div class="card">
+        <h3 data-ru="Навыки" data-en="Skills"></h3>
+        <ul>
+          <li>Linux Kernel & Drivers</li>
+          <li>ESP32 / Arduino</li>
+          <li>C / C++ Programming</li>
+          <li>Debugging & Log Analysis</li>
+          <li>Hardware & Soldering</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 data-ru="Подход" data-en="Approach"></h3>
+        <p data-ru="Глубокое изучение систем, поиск коренной причины проблем, без поверхностного анализа." data-en="Deep system exploration, finding root causes without surface-level analysis."></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="grid" id="projectsGrid"></div>
+  </section>
+
+  <section id="links">
     <div class="card">
-      <h3 data-ru="Навыки" data-en="Skills"></h3>
       <ul>
-        <li>Java / Python</li>
-        <li>Minecraft Servers</li>
-        <li>Data Analysis</li>
+        <li>🐙 GitHub — <a href="https://github.com/lixynhay" target="_blank">lixynhay</a></li>
+        <li>💬 Telegram — @lixynhay</li>
+        <li>📧 Email — example@mail.com</li>
       </ul>
     </div>
-  </div>
-</section>
-
-<section id="projects">
-  <div class="grid" id="projectsGrid"></div>
-</section>
-
-<section id="links">
-  <div class="card">
-    <ul>
-      <li>🐙 GitHub — <a href="https://github.com/lixynhay" target="_blank">lixynhay</a></li>
-      <li>💬 Telegram — @username</li>
-      <li>📧 Email — example@mail.com</li>
-    </ul>
-  </div>
-</section>
-
+  </section>
 </div>
 
-<footer>© 2026 • Dima</footer>
+<footer>© 2026 • LixynHay</footer>
 
 <script>
-  /* sections */
-  function showSection(id) {
-    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  // Typed effect
+  const typedText = "Привет!";
+  const typedEl = document.getElementById('typed');
+  let i = 0;
+  function typeWriter() {
+    if(i < typedText.length){
+      typedEl.innerHTML += typedText.charAt(i);
+      i++;
+      setTimeout(typeWriter, 120);
+    }
+  }
+  typeWriter();
+
+  // Sections
+  function showSection(id){
+    document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
 
-  /* language */
-  function setLang(lang) {
-    document.querySelectorAll('[data-ru]').forEach(el => el.textContent = el.dataset[lang]);
+  // Language
+  function setLang(lang){
+    document.querySelectorAll('[data-ru]').forEach(el=>el.textContent=el.dataset[lang]);
   }
   setLang('ru');
 
-  /* theme */
-  function toggleTheme() {
+  // Theme
+  function toggleTheme(){
     document.body.classList.toggle('light');
-    localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
   }
 
-  if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
-
-  /* CV generation */
-  function downloadCV() {
-    const text = `Dima
-Developer / Meteorologist / Chemist
-
-Skills:
-- Java, Python
-- Minecraft Servers
-- Data Analysis
-
-GitHub: github.com/lixynhay`;
-    const blob = new Blob([text], { type: 'text/plain' });
+  // CV download
+  function downloadCV(){
+    const text = `LixynHay\nEngineer & Systems Researcher\n\nSkills:\n- Linux Kernel & Drivers\n- ESP32 / Arduino\n- C / C++ Programming\n- Debugging & Log Analysis\n- Hardware & Soldering\n\nGitHub: github.com/lixynhay`;
+    const blob = new Blob([text],{type:'text/plain'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'Dima_CV.txt';
+    a.download='LixynHay_CV.txt';
     a.click();
   }
 
-  /* GitHub projects */
+  // GitHub projects
   fetch('https://api.github.com/users/lixynhay/repos')
-    .then(res => res.json())
-    .then(repos => {
-      const grid = document.getElementById('projectsGrid');
-      repos
-        .filter(r => !r.fork)
-        .sort((a,b) => b.stargazers_count - a.stargazers_count)
-        .slice(0, 6)
-        .forEach(repo => {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <h3>⭐ ${repo.name}</h3>
-            <p>${repo.description || 'Без описания'}</p>
-            <p>🧠 ${repo.language || '—'} | ⭐ ${repo.stargazers_count}</p>
-            <a href="${repo.html_url}" target="_blank">Открыть →</a>
-          `;
-          grid.appendChild(card);
-        });
+    .then(res=>res.json())
+    .then(repos=>{
+      const grid=document.getElementById('projectsGrid');
+      repos.filter(r=>!r.fork).sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,6)
+      .forEach(repo=>{
+        const card=document.createElement('div');
+        card.className='card';
+        card.innerHTML=`<h3>⭐ ${repo.name}</h3><p>${repo.description||'Без описания'}</p><p>🧠 ${repo.language||'—'} | ⭐ ${repo.stargazers_count}</p><a href="${repo.html_url}" target="_blank">Открыть →</a>`;
+        grid.appendChild(card);
+      });
     });
 
-  /* particles */
-  const c = document.getElementById('bg');
-  const ctx = c.getContext('2d');
-  let w, h, particles;
+  // Scroll reveal
+  const sections=document.querySelectorAll('section');
+  window.addEventListener('scroll',()=>{
+    const scrollY=window.scrollY+window.innerHeight*0.75;
+    sections.forEach(sec=>{
+      if(sec.offsetTop<scrollY){sec.classList.add('active');}
+    });
+  });
 
-  function resize() {
-    w = c.width = window.innerWidth;
-    h = c.height = window.innerHeight;
-    particles = Array.from({ length: 80 }, () => ({
-      x: Math.random()*w,
-      y: Math.random()*h,
-      r: Math.random()*2+1,
-      v: Math.random()*0.6+0.2
-    }));
-  }
-
-  function draw() {
+  // Gradient particles background
+  const c=document.getElementById('bg');
+  const ctx=c.getContext('2d');
+  let w,h,particles;
+  function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;
+    particles=Array.from({length:80},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2+1,v:Math.random()*0.6+0.2,hue:Math.random()*360}));}
+  function draw(){
     ctx.clearRect(0,0,w,h);
-    ctx.fillStyle = 'rgba(96,165,250,0.6)';
-    particles.forEach(p => {
-      p.y += p.v;
-      if (p.y > h) p.y = 0;
+    particles.forEach(p=>{
+      p.y+=p.v;if(p.y>h)p.y=0;
       ctx.beginPath();
+      ctx.fillStyle=`hsl(${p.hue},70%,60%)`;
       ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
       ctx.fill();
     });
     requestAnimationFrame(draw);
   }
-
-  resize();
-  draw();
-  window.onresize = resize;
+  resize();draw();window.onresize=resize;
 </script>
 
 </body>
