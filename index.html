@@ -31,9 +31,9 @@
       overflow-x: hidden;
     }
     canvas { position: fixed; inset: 0; z-index: -1; }
-    header { padding: 90px 20px 60px; text-align: center; }
-    header h1 { font-size: 3rem; margin: 0; }
-    header p { color: var(--muted); font-size: 1.2rem; }
+    header { padding: 90px 20px 60px; text-align: center; perspective: 1000px; }
+    header h1 { font-size: 3rem; margin: 0; transform: translateZ(0); transition: transform 0.3s; }
+    header p { color: var(--muted); font-size: 1.2rem; transform: translateZ(0); transition: transform 0.3s; }
     nav { display: flex; justify-content: center; gap: 25px; margin-bottom: 40px; }
     nav button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 1rem; position: relative; }
     nav button::after { content: ""; position: absolute; left: 0; bottom: -6px; width: 0; height: 2px; background: var(--accent); transition: 0.3s; }
@@ -45,8 +45,8 @@
     section { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
     section.active { opacity: 1; transform: translateY(0); }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
-    .card { background: var(--card); border-radius: 18px; padding: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); transition: transform 0.5s ease, box-shadow 0.5s ease, background 0.5s ease, filter 0.5s ease; }
-    .card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 35px 60px rgba(0,0,0,0.25); filter: brightness(1.05); }
+    .card { background: var(--card); border-radius: 18px; padding: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); transition: transform 0.5s ease, box-shadow 0.5s ease, background 0.5s ease, filter 0.5s ease, backdrop-filter 0.5s ease; }
+    .card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 35px 60px rgba(0,0,0,0.25); filter: brightness(1.05); backdrop-filter: blur(8px); }
     a { color: var(--accent); text-decoration: none; }
     footer { text-align: center; padding: 30px; color: var(--muted); font-size: 0.9rem; }
   </style>
@@ -112,8 +112,8 @@
     <div class="card">
       <ul>
         <li>🐙 GitHub — <a href="https://github.com/lixynhay" target="_blank">lixynhay</a></li>
-        <li>💬 Telegram — @pupege</li>
-        <li>📧 Email — licynyt@gmail.com</li>
+        <li>💬 Telegram — @lixynhay</li>
+        <li>📧 Email — lixynhay@gmail.com</li>
       </ul>
     </div>
   </section>
@@ -134,6 +134,13 @@
     }
   }
   typeWriter();
+
+  // Parallax header on scroll
+  window.addEventListener('scroll',()=>{
+    const scrollY=window.scrollY;
+    document.querySelector('header h1').style.transform=`translateY(${scrollY*0.3}px)`;
+    document.querySelector('header p').style.transform=`translateY(${scrollY*0.2}px)`;
+  });
 
   // Sections
   function showSection(id){
@@ -185,10 +192,12 @@
     });
   });
 
-  // Gradient particles background
+  // Gradient particles background with cursor interaction
   const c=document.getElementById('bg');
   const ctx=c.getContext('2d');
-  let w,h,particles;
+  let w,h,particles,mouse={x:null,y:null};
+  window.addEventListener('mousemove',e=>{mouse.x=e.clientX; mouse.y=e.clientY;});
+
   function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;
     particles=Array.from({length:80},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2+1,v:Math.random()*0.6+0.2,hue:Math.random()*360}));}
   function draw(){
@@ -196,8 +205,11 @@
     particles.forEach(p=>{
       p.y+=p.v;if(p.y>h)p.y=0;
       ctx.beginPath();
+      let dx = mouse.x-p.x, dy = mouse.y-p.y;
+      let dist=Math.sqrt(dx*dx+dy*dy);
+      let radius=p.r+(dist<100?20*(1-dist/100):0);
       ctx.fillStyle=`hsl(${p.hue},70%,60%)`;
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.arc(p.x,p.y,radius,0,Math.PI*2);
       ctx.fill();
     });
     requestAnimationFrame(draw);
