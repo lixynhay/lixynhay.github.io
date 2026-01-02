@@ -35,19 +35,19 @@
     header h1 { font-size: 3rem; margin: 0; transform: translateZ(0); transition: transform 0.3s; }
     header p { color: var(--muted); font-size: 1.2rem; transform: translateZ(0); transition: transform 0.3s; }
     nav { display: flex; justify-content: center; gap: 25px; margin-bottom: 40px; }
-    nav button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 1rem; position: relative; }
+    nav button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 1rem; position: relative; transition: color 0.3s; }
     nav button::after { content: ""; position: absolute; left: 0; bottom: -6px; width: 0; height: 2px; background: var(--accent); transition: 0.3s; }
     nav button:hover::after { width: 100%; }
-    .controls { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 10; }
+    .controls { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 20; }
     .controls button { padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5f5; background: var(--card); color: var(--text); cursor: pointer; transition: all var(--transition); }
     .controls button:hover { transform: scale(1.1); }
     .container { max-width: 1000px; margin: 0 auto 80px; padding: 0 20px; }
-    section { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
-    section.active { opacity: 1; transform: translateY(0); }
+    section { opacity: 1; transform: translateY(0); transition: opacity 0.8s, transform 0.8s; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
-    .card { background: var(--card); border-radius: 18px; padding: 25px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); transition: transform 0.5s ease, box-shadow 0.5s ease, background 0.5s ease, filter 0.5s ease, backdrop-filter 0.5s ease; }
-    .card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 35px 60px rgba(0,0,0,0.25); filter: brightness(1.05); backdrop-filter: blur(8px); }
-    a { color: var(--accent); text-decoration: none; }
+    .card { background: var(--card); border-radius: 18px; padding: 25px; position: relative; z-index: 1; box-shadow: 0 15px 30px rgba(0,0,0,0.15); transition: transform 0.5s ease, box-shadow 0.5s ease, background 0.5s ease, filter 0.5s ease, backdrop-filter 0.5s ease, z-index 0s; }
+    .card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 35px 60px rgba(0,0,0,0.25); filter: brightness(1.05); backdrop-filter: blur(8px); z-index: 10; }
+    a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+    a:hover { color: #fff; }
     footer { text-align: center; padding: 30px; color: var(--muted); font-size: 0.9rem; }
     .filter { margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
     .filter button { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; background: var(--card); color: var(--text); transition: all 0.3s; }
@@ -70,14 +70,14 @@
 </header>
 
 <nav>
-  <button onclick="showSection('home')" data-ru="Главная" data-en="Home"></button>
-  <button onclick="showSection('about')" data-ru="Обо мне" data-en="About"></button>
-  <button onclick="showSection('projects')" data-ru="Проекты" data-en="Projects"></button>
-  <button onclick="showSection('links')" data-ru="Контакты" data-en="Contacts"></button>
+  <button onclick="scrollToSection('home')" data-ru="Главная" data-en="Home"></button>
+  <button onclick="scrollToSection('about')" data-ru="Обо мне" data-en="About"></button>
+  <button onclick="scrollToSection('projects')" data-ru="Проекты" data-en="Projects"></button>
+  <button onclick="scrollToSection('links')" data-ru="Контакты" data-en="Contacts"></button>
 </nav>
 
 <div class="container">
-  <section id="home" class="active">
+  <section id="home">
     <div class="card">
       <h2 data-ru="Портфолио" data-en="Portfolio"></h2>
       <p data-ru="Современное портфолио с интерактивными проектами и анимациями." data-en="A modern interactive portfolio with projects and animations."></p>
@@ -125,6 +125,7 @@
 
 <footer>© 2026 • LixynHay</footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // Typed effect
 const typedText = "Hi!";
@@ -140,8 +141,11 @@ window.addEventListener('scroll',()=>{
  document.querySelector('header p').style.transform=`translateY(${scrollY*0.2}px)`;
 });
 
-// Sections
-function showSection(id){document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+// Smooth scroll to section
+function scrollToSection(id){
+ const section=document.getElementById(id);
+ if(section){section.scrollIntoView({behavior:'smooth', block:'start'});}
+}
 
 // Language
 function setLang(lang){document.querySelectorAll('[data-ru]').forEach(el=>el.textContent=el.dataset[lang]);}
@@ -150,17 +154,15 @@ setLang('ru');
 // Theme
 function toggleTheme(){document.body.classList.toggle('light');}
 
-// CV download
+// PDF CV
 function downloadCV(){
- const text=`LixynHay\nEngineer & Systems Researcher\n\nSkills:\n- Linux Kernel & Drivers\n- ESP32 / Arduino\n- C / C++ Programming\n- Debugging & Log Analysis\n- Hardware & Soldering\n\nGitHub: github.com/lixynhay`;
- const blob=new Blob([text],{type:'text/plain'});
- const a=document.createElement('a');
- a.href=URL.createObjectURL(blob);
- a.download='LixynHay_CV.txt';
- a.click();
+ const { jsPDF } = window.jspdf;
+ const doc = new jsPDF();
+ doc.text(`LixynHay\nEngineer & Systems Researcher\n\nSkills:\n- Linux Kernel & Drivers\n- ESP32 / Arduino\n- C / C++ Programming\n- Debugging & Log Analysis\n- Hardware & Soldering\n\nGitHub: github.com/lixynhay`, 10, 10);
+ doc.save('LixynHay_CV.pdf');
 }
 
-// GitHub projects
+// GitHub projects & filters
 const projectsGrid=document.getElementById('projectsGrid');
 const filtersDiv=document.getElementById('projectFilters');
 let allRepos=[];
@@ -171,7 +173,6 @@ fetch('https://api.github.com/users/lixynhay/repos')
   populateFilters();
   showProjects();
 });
-
 function populateFilters(){
   let langs=[...new Set(allRepos.map(r=>r.language).filter(l=>l))];
   langs.unshift('All');
@@ -183,7 +184,6 @@ function populateFilters(){
     filtersDiv.appendChild(btn);
   });
 }
-
 function showProjects(lang='All'){
   projectsGrid.innerHTML='';
   allRepos.filter(r=>lang==='All'||r.language===lang).sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,12).forEach(repo=>{
@@ -194,14 +194,14 @@ function showProjects(lang='All'){
   });
 }
 
-// Scroll reveal
+// Scroll reveal animation
 const sections=document.querySelectorAll('section');
 window.addEventListener('scroll',()=>{
-  const scrollY=window.scrollY+window.innerHeight*0.75;
-  sections.forEach(sec=>{if(sec.offsetTop<scrollY){sec.classList.add('active');}});
+ const scrollY=window.scrollY+window.innerHeight*0.75;
+ sections.forEach(sec=>{if(sec.offsetTop<scrollY){sec.style.transform='translateY(0)'; sec.style.opacity='1';}});
 });
 
-// Gradient particles with cursor
+// Gradient particles
 const c=document.getElementById('bg');
 const ctx=c.getContext('2d');
 let w,h,particles,mouse={x:null,y:null};
