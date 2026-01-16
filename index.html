@@ -4,10 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LixynHay — Портфолио</title>
+  <meta name="description" content="Персональное портфолио инженера и исследователя систем">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="manifest" href="data:application/json,{%20%22name%22:%22LixynHay%22,%20%22short_name%22:%22LH%22,%20%22icons%22:[{%20%22src%22:%22data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==%22,%20%22sizes%22:%221x1%22,%20%22type%22:%22image/png%22%20}],%20%22start_url%22:%22/%22,%20%22display%22:%22standalone%22,%20%22background_color%22:%23020617,%20%22theme_color%22:%2360a5fa%20}">
   <style>
     :root {
       --bg: #020617;
-      --card: rgba(2,6,23,0.9);
+      --card: rgba(2, 6, 23, 0.9);
       --text: #e5e7eb;
       --muted: #94a3b8;
       --accent: #60a5fa;
@@ -15,7 +18,7 @@
     }
     body.light {
       --bg: #f8fafc;
-      --card: rgba(255,255,255,0.9);
+      --card: rgba(255, 255, 255, 0.9);
       --text: #020617;
       --muted: #475569;
       --accent: #2563eb;
@@ -34,7 +37,7 @@
     header { padding: 90px 20px 60px; text-align: center; perspective: 1000px; }
     header h1 { font-size: 3rem; margin: 0; transform: translateZ(0); transition: transform 0.3s; }
     header p { color: var(--muted); font-size: 1.2rem; transform: translateZ(0); transition: transform 0.3s; }
-    nav { display: flex; justify-content: center; gap: 25px; margin-bottom: 40px; }
+    nav { display: flex; justify-content: center; gap: 25px; margin-bottom: 40px; flex-wrap: wrap; }
     nav button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 1rem; position: relative; transition: color 0.3s; }
     nav button::after { content: ""; position: absolute; left: 0; bottom: -6px; width: 0; height: 2px; background: var(--accent); transition: 0.3s; }
     nav button:hover::after { width: 100%; }
@@ -42,10 +45,11 @@
     .controls button { padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5f5; background: var(--card); color: var(--text); cursor: pointer; transition: all var(--transition); }
     .controls button:hover { transform: scale(1.1); }
     .container { max-width: 1000px; margin: 0 auto 80px; padding: 0 20px; }
-    section { opacity: 1; transform: translateY(0); transition: opacity 0.8s, transform 0.8s; }
+    section { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+    section.visible { opacity: 1; transform: translateY(0); }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
-    .card { background: var(--card); border-radius: 18px; padding: 25px; position: relative; z-index: 1; box-shadow: 0 15px 30px rgba(0,0,0,0.15); transition: transform 0.5s ease, box-shadow 0.5s ease, background 0.5s ease, filter 0.5s ease, backdrop-filter 0.5s ease, z-index 0s; }
-    .card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 35px 60px rgba(0,0,0,0.25); filter: brightness(1.05); backdrop-filter: blur(8px); z-index: 10; }
+    .card { background: var(--card); border-radius: 18px; padding: 25px; position: relative; z-index: 1; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); transition: transform 0.5s ease, box-shadow 0.5s ease; }
+    .card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 35px 60px rgba(0, 0, 0, 0.25); }
     a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
     a:hover { color: #fff; }
     footer { text-align: center; padding: 30px; color: var(--muted); font-size: 0.9rem; }
@@ -56,12 +60,12 @@
 </head>
 <body>
 
-<canvas id="bg"></canvas>
+<canvas id="bg" aria-hidden="true"></canvas>
 <div class="controls">
-  <button onclick="toggleTheme()">🌓</button>
-  <button onclick="setLang('ru')">RU</button>
-  <button onclick="setLang('en')">EN</button>
-  <button onclick="downloadCV()">CV</button>
+  <button onclick="toggleTheme()" aria-label="Toggle theme">🌓</button>
+  <button onclick="setLang('ru')" aria-label="Russian">RU</button>
+  <button onclick="setLang('en')" aria-label="English">EN</button>
+  <button onclick="downloadCV()" aria-label="Download CV">CV</button>
 </div>
 
 <header>
@@ -115,101 +119,199 @@
   <section id="links">
     <div class="card">
       <ul>
-        <li>🐙 GitHub — <a href="https://github.com/lixynhay" target="_blank">lixynhay</a></li>
+        <li>🐙 GitHub — <a href="https://github.com/lixynhay" target="_blank" rel="noopener noreferrer">lixynhay</a></li>
         <li>💬 Telegram — @lixynhay</li>
-        <li>📧 Email — lixynhay@gmail.com</li>
+        <li>📧 Email — <a href="mailto:lixynhay@gmail.com">lixynhay@gmail.com</a></li>
       </ul>
     </div>
   </section>
 </div>
 
-<footer>© 2026 • LixynHay</footer>
+<footer>© <span id="year"></span> • LixynHay</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-// Typed effect
-const typedText = "Hi!";
-const typedEl = document.getElementById('typed');
-let i = 0;
-function typeWriter(){if(i<typedText.length){typedEl.innerHTML+=typedText.charAt(i);i++;setTimeout(typeWriter,120);}}
-typeWriter();
+(() => {
+  /* ---------- 1. Utils ---------- */
+  const $ = q => document.querySelector(q);
+  const on = (el, ev, fn) => el.addEventListener(ev, fn);
 
-// Parallax header
-window.addEventListener('scroll',()=>{
- const scrollY=window.scrollY;
- document.querySelector('header h1').style.transform=`translateY(${scrollY*0.3}px)`;
- document.querySelector('header p').style.transform=`translateY(${scrollY*0.2}px)`;
-});
+  /* ---------- 2. Typewriter ---------- */
+  const text = "Hi!";
+  let i = 0;
+  function typeWriter() {
+    if (i < text.length) {
+      $("#typed").textContent += text.charAt(i);
+      i++;
+      setTimeout(typeWriter, 120);
+    }
+  }
+  typeWriter();
 
-// Smooth scroll to section
-function scrollToSection(id){
- const section=document.getElementById(id);
- if(section){section.scrollIntoView({behavior:'smooth', block:'start'});}
-}
-
-// Language
-function setLang(lang){document.querySelectorAll('[data-ru]').forEach(el=>el.textContent=el.dataset[lang]);}
-setLang('ru');
-
-// Theme
-function toggleTheme(){document.body.classList.toggle('light');}
-
-// PDF CV
-function downloadCV(){
- const { jsPDF } = window.jspdf;
- const doc = new jsPDF();
- doc.text(`LixynHay\nEngineer & Systems Researcher\n\nSkills:\n- Linux Kernel & Drivers\n- ESP32 / Arduino\n- C / C++ Programming\n- Debugging & Log Analysis\n- Hardware & Soldering\n\nGitHub: github.com/lixynhay`, 10, 10);
- doc.save('LixynHay_CV.pdf');
-}
-
-// GitHub projects & filters
-const projectsGrid=document.getElementById('projectsGrid');
-const filtersDiv=document.getElementById('projectFilters');
-let allRepos=[];
-fetch('https://api.github.com/users/lixynhay/repos')
-.then(res=>res.json())
-.then(repos=>{
-  allRepos=repos.filter(r=>!r.fork);
-  populateFilters();
-  showProjects();
-});
-function populateFilters(){
-  let langs=[...new Set(allRepos.map(r=>r.language).filter(l=>l))];
-  langs.unshift('All');
-  langs.forEach(l=>{
-    const btn=document.createElement('button');
-    btn.textContent=l;
-    btn.className=l==='All'?'active':'';
-    btn.onclick=()=>{document.querySelectorAll('.filter button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');showProjects(l);};
-    filtersDiv.appendChild(btn);
+  /* ---------- 3. Parallax ---------- */
+  on(window, "scroll", () => {
+    const y = window.scrollY;
+    $("header h1").style.transform = `translateY(${y * 0.3}px)`;
+    $("header p").style.transform = `translateY(${y * 0.2}px)`;
   });
-}
-function showProjects(lang='All'){
-  projectsGrid.innerHTML='';
-  allRepos.filter(r=>lang==='All'||r.language===lang).sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,12).forEach(repo=>{
-    const card=document.createElement('div');
-    card.className='card';
-    card.innerHTML=`<h3>⭐ ${repo.name}</h3><p>${repo.description||'Без описания'}</p><p>🧠 ${repo.language||'—'} | ⭐ ${repo.stargazers_count}</p><a href='${repo.html_url}' target='_blank'>Открыть →</a>`;
-    projectsGrid.appendChild(card);
+
+  /* ---------- 4. Smooth scroll ---------- */
+  window.scrollToSection = id => {
+    const el = $(`#${id}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  /* ---------- 5. Language ---------- */
+  window.setLang = lang => {
+    document.querySelectorAll("[data-ru]").forEach(el => el.textContent = el.dataset[lang]);
+  };
+
+  /* ---------- 6. Theme ---------- */
+  function applyTheme() {
+    const stored = localStorage.theme;
+    const prefers = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "";
+    const theme = stored || prefers;
+    document.body.classList.toggle("light", theme === "light");
+  }
+  window.toggleTheme = () => {
+    document.body.classList.toggle("light");
+    localStorage.theme = document.body.classList.contains("light") ? "light" : "";
+  };
+  on(document, "DOMContentLoaded", applyTheme);
+
+  /* ---------- 7. CV ---------- */
+  window.downloadCV = () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text(`LixynHay\nEngineer & Systems Researcher\n\nSkills:\n- Linux Kernel & Drivers\n- ESP32 / Arduino\n- C / C++ Programming\n- Debugging & Log Analysis\n- Hardware & Soldering\n\nGitHub: github.com/lixynhay`, 10, 10);
+    doc.save("LixynHay_CV.pdf");
+  };
+
+  /* ---------- 8. GitHub Projects ---------- */
+  const CACHE_KEY = "gh-cache";
+  const CACHE_TTL = 1000 * 60 * 10; // 10 мин
+  let allRepos = [];
+
+  async function fetchRepos() {
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const { ts, data } = JSON.parse(cached);
+      if (Date.now() - ts < CACHE_TTL) return data;
+    }
+    const res = await fetch("https://api.github.com/users/lixynhay/repos?per_page=100");
+    const data = await res.json();
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+    return data;
+  }
+
+  async function loadProjects() {
+    allRepos = (await fetchRepos()).filter(r => !r.fork);
+    populateFilters();
+    showProjects();
+  }
+
+  function populateFilters() {
+    const langs = ["All", ...new Set(allRepos.map(r => r.language).filter(l => l))];
+    const filterDiv = $("#projectFilters");
+    filterDiv.innerHTML = "";
+    langs.forEach((l, idx) => {
+      const btn = document.createElement("button");
+      btn.textContent = l;
+      btn.className.toggle = idx === 0 ? "active" : "";
+      btn.onclick = () => {
+        filterDiv.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        showProjects(l === "All" ? null : l);
+      };
+      filterDiv.appendChild(btn);
+    });
+  }
+
+  function showProjects(lang = null) {
+    const grid = $("#projectsGrid");
+    grid.innerHTML = "";
+    allRepos
+      .filter(r => !lang || r.language === lang)
+      .sort((a, b) => b.stargazers_count - a.stargazers_count)
+      .slice(0, 12)
+      .forEach(r => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>⭐ ${r.name}</h3>
+          <p>${r.description || "Без описания"}</p>
+          <p>🧠 ${r.language || "—"} | ⭐ ${r.stargazers_count}</p>
+          <a href="${r.html_url}" target="_blank" rel="noopener noreferrer">Открыть →</a>
+        `;
+        grid.appendChild(card);
+      });
+  }
+
+  loadProjects();
+
+  /* ---------- 9. Scroll reveal ---------- */
+  const sections = document.querySelectorAll("section");
+  const reveal = () => {
+    const trigger = window.scrollY + window.innerHeight * 0.75;
+    sections.forEach(sec => {
+      if (sec.offsetTop < trigger) sec.classList.add("visible");
+    });
+  };
+  on(window, "scroll", reveal);
+  reveal();
+
+  /* ---------- 10. Canvas particles (Retina-ready) ---------- */
+  const c = $("#bg");
+  const ctx = c.getContext("2d");
+  let w, h, dpr, particles, mouse = { x: null, y: null };
+
+  on(window, "mousemove", e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
   });
-}
 
-// Scroll reveal animation
-const sections=document.querySelectorAll('section');
-window.addEventListener('scroll',()=>{
- const scrollY=window.scrollY+window.innerHeight*0.75;
- sections.forEach(sec=>{if(sec.offsetTop<scrollY){sec.style.transform='translateY(0)'; sec.style.opacity='1';}});
-});
+  function resize() {
+    w = c.clientWidth;
+    h = c.clientHeight;
+    dpr = window.devicePixelRatio || 1;
+    c.width = w * dpr;
+    c.height = h * dpr;
+    c.style.width = w + "px";
+    c.style.height = h + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    particles = Array.from({ length: 80 }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 2 + 1,
+      v: Math.random() * 0.6 + 0.2,
+      hue: Math.random() * 360
+    }));
+  }
 
-// Gradient particles
-const c=document.getElementById('bg');
-const ctx=c.getContext('2d');
-let w,h,particles,mouse={x:null,y:null};
-window.addEventListener('mousemove',e=>{mouse.x=e.clientX; mouse.y=e.clientY;});
-function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;particles=Array.from({length:80},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*2+1,v:Math.random()*0.6+0.2,hue:Math.random()*360}));}
-function draw(){ctx.clearRect(0,0,w,h);particles.forEach(p=>{p.y+=p.v;if(p.y>h)p.y=0;ctx.beginPath();let dx=mouse.x-p.x,dy=mouse.y-p.y;let dist=Math.sqrt(dx*dx+dy*dy);let radius=p.r+(dist<100?20*(1-dist/100):0);ctx.fillStyle=`hsl(${p.hue},70%,60%)`;ctx.arc(p.x,p.y,radius,0,Math.PI*2);ctx.fill();});requestAnimationFrame(draw);}
-resize();draw();window.onresize=resize;
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    particles.forEach(p => {
+      p.y += p.v;
+      if (p.y > h) p.y = 0;
+      const dx = mouse.x - p.x;
+      const dy = mouse.y - p.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const radius = p.r + (dist < 100 ? 20 * (1 - dist / 100) : 0);
+      ctx.beginPath();
+      ctx.fillStyle = `hsl(${p.hue}, 70%, 60%)`;
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+
+  on(window, "resize", resize);
+  resize();
+  draw();
+
+  /* ---------- 11. Dynamic year ---------- */
+  $("#year").textContent = new Date().getFullYear();
+})();
 </script>
-
 </body>
 </html>
