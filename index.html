@@ -6,7 +6,7 @@
   <title>LixynHay — Портфолио</title>
   <meta name="description" content="Персональное портфолио инженера и исследователя систем">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
-  <link rel="manifest" href="data:application/json,{%20%22name%22:%22LixynHay%22,%20%22short_name%22:%22LH%22,%20%22icons%22:[{%20%22src%22:%22data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==%22,%20%22sizes%22:%221x1%22,%20%22type%22:%22image/png%22%20}],%20%22start_url%22:%22/%22,%20%22display%22:%22standalone%22,%20%22background_color%22:%23020617,%20%22theme_color%22:%2360a5fa%20}">
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22LixynHay%22%2C%22short_name%22%3A%22LH%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg%3D%3D%22%2C%22sizes%22%3A%221x1%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%2360a5fa%22%7D">
   <style>
     :root {
       --bg: #020617;
@@ -161,10 +161,34 @@
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  /* ---------- 5. Language ---------- */
-  window.setLang = lang => {
-    document.querySelectorAll("[data-ru]").forEach(el => el.textContent = el.dataset[lang]);
-  };
+  /* ---------- 5. Language auto + fallback ---------- */
+  const RU = "ru", EN = "en";
+  function applyLang(lang) {
+    const l = (lang === RU || lang === EN) ? lang : RU;
+    document.querySelectorAll("[data-ru]").forEach(el => {
+      el.textContent = el.dataset[l] || el.dataset.ru;
+    });
+    localStorage.userLang = l;
+  }
+  window.setLang = code => applyLang(code);
+
+  async function autoLang() {
+    if (localStorage.userLang) {
+      applyLang(localStorage.userLang);
+      return;
+    }
+    try {
+      const geo = await fetch("https://ipapi.co/json").then(r => r.json());
+      const country = geo.country_code;
+      if (["US", "GB", "CA", "AU"].includes(country)) {
+        applyLang(EN);
+        return;
+      }
+    } catch (e) {}
+    const navLang = navigator.language.slice(0, 2).toLowerCase();
+    applyLang(navLang === "en" ? EN : RU);
+  }
+  on(document, "DOMContentLoaded", autoLang);
 
   /* ---------- 6. Theme ---------- */
   function applyTheme() {
@@ -189,7 +213,7 @@
 
   /* ---------- 8. GitHub Projects ---------- */
   const CACHE_KEY = "gh-cache";
-  const CACHE_TTL = 1000 * 60 * 10; // 10 мин
+  const CACHE_TTL = 1000 * 60 * 10;
   let allRepos = [];
 
   async function fetchRepos() {
@@ -217,7 +241,7 @@
     langs.forEach((l, idx) => {
       const btn = document.createElement("button");
       btn.textContent = l;
-      btn.className.toggle = idx === 0 ? "active" : "";
+      btn.className = idx === 0 ? "active" : "";
       btn.onclick = () => {
         filterDiv.querySelectorAll("button").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
@@ -260,7 +284,7 @@
   on(window, "scroll", reveal);
   reveal();
 
-  /* ---------- 10. Canvas particles (Retina-ready) ---------- */
+  /* ---------- 10. Canvas particles (Retina) ---------- */
   const c = $("#bg");
   const ctx = c.getContext("2d");
   let w, h, dpr, particles, mouse = { x: null, y: null };
