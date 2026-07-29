@@ -6,17 +6,13 @@
     <title>LixynHay | Engineer & Researcher</title>
     <meta name="description" content="Portfolio of LixynHay - Systems Engineer & Researcher specializing in Linux Kernel, ESP32, and Embedded Systems.">
     
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     
-    <!-- Chart.js for GitHub Stats -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- jsPDF for CV Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
@@ -51,7 +47,6 @@
             overflow-x: hidden;
         }
 
-        /* Background Animation */
         #canvas-bg {
             position: fixed;
             top: 0;
@@ -62,7 +57,6 @@
             opacity: 0.4;
         }
 
-        /* Navigation */
         nav {
             position: fixed;
             top: 0;
@@ -96,7 +90,6 @@
         }
         button:hover { background: var(--card-bg); border-color: var(--primary); }
 
-        /* Sections */
         section {
             min-height: 100vh;
             padding: 6rem 2rem 2rem;
@@ -119,7 +112,6 @@
             border-radius: 2px;
         }
 
-        /* Hero Section */
         .hero-content { text-align: center; }
         .hero-title { font-size: 4rem; font-weight: 800; margin-bottom: 1rem; }
         .typing-text { color: var(--primary); font-family: 'Fira Code', monospace; }
@@ -137,7 +129,6 @@
         }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6); }
 
-        /* About & Skills */
         .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
         .skills-container { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; }
         .skill-tag {
@@ -151,7 +142,6 @@
         }
         .skill-tag:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 0 10px rgba(6, 182, 212, 0.3); }
 
-        /* GitHub Stats Section */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -185,7 +175,6 @@
             height: 300px;
         }
 
-        /* Projects */
         .projects-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -213,7 +202,6 @@
         .lang-badge { display: flex; align-items: center; gap: 0.5rem; }
         .lang-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
-        /* Footer */
         footer {
             text-align: center;
             padding: 2rem;
@@ -225,15 +213,13 @@
         .social-links a { color: var(--text-color); font-size: 1.5rem; transition: color 0.3s; }
         .social-links a:hover { color: var(--primary); }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .hero-title { font-size: 2.5rem; }
             .about-grid { grid-template-columns: 1fr; }
-            .nav-links { display: none; } /* Simplified for mobile */
+            .nav-links { display: none; }
             section { padding-top: 4rem; }
         }
 
-        /* Animations */
         .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
         .fade-in.visible { opacity: 1; transform: translateY(0); }
     </style>
@@ -284,7 +270,6 @@
                 </div>
             </div>
             <div style="text-align: center;">
-                <!-- Placeholder for potential image or additional visual -->
                 <div style="font-size: 5rem;">⚡🛠️💻</div>
             </div>
         </div>
@@ -294,7 +279,6 @@
         <h2 data-i18n="title_stats">GitHub Статистика</h2>
         
         <div class="stats-grid fade-in" id="main-stats">
-            <!-- Dynamic Content -->
             <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">Repositories</div></div>
             <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">Followers</div></div>
             <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">Total Stars</div></div>
@@ -314,7 +298,6 @@
     <section id="projects">
         <h2 data-i18n="title_projects">Проекты</h2>
         <div class="projects-grid" id="projects-container">
-            <!-- Dynamic Projects -->
             <div class="project-card" style="text-align:center; padding: 3rem;">
                 <p>Loading projects from GitHub...</p>
             </div>
@@ -323,18 +306,16 @@
 
     <footer>
         <div class="social-links">
-            <a href="https://github.com/LixynHay" target="_blank" aria-label="GitHub">GH</a>
-            <a href="https://t.me/yourusername" target="_blank" aria-label="Telegram">TG</a>
-            <a href="mailto:contact@example.com" aria-label="Email">✉️</a>
+            <a href="https://github.com/lixynhay" target="_blank" aria-label="GitHub">GH</a>
+            <a href="https://t.me/lixynhay" target="_blank" aria-label="Telegram">TG</a>
+            <a href="mailto:lixynhay@gmail.com" aria-label="Email">✉️</a>
         </div>
         <p>&copy; <span id="year"></span> LixynHay. Built with ⚡ and Code.</p>
     </footer>
 
     <script>
-        // --- Configuration ---
-        const GITHUB_USERNAME = 'LixynHay'; // Update if needed
+        const GITHUB_USERNAME = 'LixynHay';
         
-        // --- Translations ---
         const i18n = {
             ru: {
                 nav_home: "Главная", nav_about: "Обо мне", nav_stats: "Статистика", nav_projects: "Проекты",
@@ -356,7 +337,6 @@
             }
         };
 
-        // --- State & Init ---
         let currentLang = navigator.language.startsWith('ru') ? 'ru' : 'en';
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -369,7 +349,6 @@
             document.getElementById('year').textContent = new Date().getFullYear();
         });
 
-        // --- Theme Toggle ---
         function initTheme() {
             const savedTheme = localStorage.getItem('theme');
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -386,7 +365,6 @@
             });
         }
 
-        // --- Language Toggle ---
         document.getElementById('lang-toggle').addEventListener('click', () => {
             currentLang = currentLang === 'ru' ? 'en' : 'ru';
             document.getElementById('lang-toggle').textContent = currentLang.toUpperCase();
@@ -400,7 +378,6 @@
             });
         }
 
-        // --- Typing Effect ---
         function initTyping() {
             const text = "LixynHay";
             const element = document.querySelector('.typing-text');
@@ -415,7 +392,6 @@
             type();
         }
 
-        // --- Scroll Reveal ---
         function initScrollReveal() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -428,14 +404,11 @@
             document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
         }
 
-        // --- GitHub Data Fetching ---
         async function fetchGitHubData() {
             try {
-                // Fetch User Stats
                 const userRes = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`);
                 const userData = await userRes.json();
                 
-                // Fetch Repos
                 const reposRes = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`);
                 const reposData = await reposRes.json();
 
@@ -458,7 +431,7 @@
                 { val: user.public_repos, label: 'Repositories' },
                 { val: user.followers, label: 'Followers' },
                 { val: totalStars, label: 'Total Stars' },
-                { val: user.total_private_repos || 0, label: 'Private Repos' } // Approximation if private not visible
+                { val: user.total_private_repos || 0, label: 'Private Repos' }
             ];
 
             const container = document.getElementById('main-stats');
@@ -472,7 +445,6 @@
 
         function renderProjects(repos) {
             const container = document.getElementById('projects-container');
-            // Filter out forks and sort by stars/update
             const myRepos = repos.filter(r => !r.fork).sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 6);
 
             if (myRepos.length === 0) {
@@ -509,12 +481,10 @@
             return colors[lang] || '#cccccc';
         }
 
-        // --- Charts (Chart.js) ---
         let langChartInstance = null;
         let activityChartInstance = null;
 
         function renderCharts(repos) {
-            // Prepare Language Data
             const langCounts = {};
             repos.forEach(repo => {
                 if (repo.language) {
@@ -522,7 +492,6 @@
                 }
             });
 
-            // Prepare Activity Data (Last 12 months based on updated_at)
             const monthCounts = new Array(12).fill(0);
             const now = new Date();
             repos.forEach(repo => {
@@ -539,7 +508,6 @@
             if (langChartInstance) langChartInstance.destroy();
             if (activityChartInstance) activityChartInstance.destroy();
 
-            // Language Doughnut Chart
             langChartInstance = new Chart(ctxLang, {
                 type: 'doughnut',
                 data: {
@@ -560,7 +528,6 @@
                 }
             });
 
-            // Activity Bar Chart
             activityChartInstance = new Chart(ctxAct, {
                 type: 'bar',
                 data: {
@@ -587,7 +554,6 @@
             });
         }
 
-        // --- CV Generator (Simple) ---
         function generateCV() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -604,7 +570,6 @@
             doc.save("LixynHay_CV.pdf");
         }
 
-        // --- Canvas Background Animation ---
         function initCanvas() {
             const canvas = document.getElementById('canvas-bg');
             const ctx = canvas.getContext('2d');
