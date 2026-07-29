@@ -1,520 +1,657 @@
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LixynHay — Портфолио</title>
-  <meta name="description" content="Персональное портфолио инженера и исследователя систем">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-primary: #0a0a0f;
-      --bg-secondary: #12121a;
-      --bg-card: rgba(18, 18, 26, 0.7);
-      --bg-glass: rgba(255, 255, 255, 0.03);
-      --text-primary: #ffffff;
-      --text-secondary: #a0a0b0;
-      --text-muted: #6b6b80;
-      --accent-primary: #60a5fa;
-      --accent-secondary: #818cf8;
-      --accent-gradient: linear-gradient(135deg, #60a5fa 0%, #818cf8 50%, #c084fc 100%);
-      --neon-glow: 0 0 20px rgba(96, 165, 250, 0.3);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      --shadow-neon: 0 0 30px rgba(96, 165, 250, 0.15);
-    }
-    body.light {
-      --bg-primary: #f8fafc;
-      --bg-secondary: #ffffff;
-      --bg-card: rgba(255, 255, 255, 0.85);
-      --bg-glass: rgba(0, 0, 0, 0.02);
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #94a3b8;
-      --accent-primary: #2563eb;
-      --accent-secondary: #6366f1;
-      --accent-gradient: linear-gradient(135deg, #2563eb 0%, #6366f1 50%, #a855f7 100%);
-      --neon-glow: 0 0 20px rgba(37, 99, 235, 0.2);
-      --card-border: rgba(0, 0, 0, 0.08);
-      --shadow-neon: 0 0 30px rgba(37, 99, 235, 0.1);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    ::selection { background: var(--accent-primary); color: white; }
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      scroll-behavior: smooth;
-      overflow-x: hidden;
-      line-height: 1.6;
-    }
-    canvas { position: fixed; inset: 0; z-index: -1; }
-    header { padding: 120px 20px 80px; text-align: center; }
-    header h1 {
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
-      font-weight: 800;
-      margin: 0 0 15px;
-      background: var(--accent-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 0 30px rgba(96, 165, 250, 0.3));
-      animation: glow 3s ease-in-out infinite alternate;
-    }
-    @keyframes glow {
-      from { filter: drop-shadow(0 0 20px rgba(96, 165, 250, 0.2)); }
-      to { filter: drop-shadow(0 0 35px rgba(96, 165, 250, 0.4)); }
-    }
-    header p { color: var(--text-secondary); font-size: clamp(1rem, 2.5vw, 1.3rem); max-width: 600px; margin: 0 auto; }
-    .typing-cursor::after { content: '|'; animation: blink 1s step-end infinite; }
-    @keyframes blink { 50% { opacity: 0; } }
-    nav { display: flex; justify-content: center; gap: 30px; margin-bottom: 60px; flex-wrap: wrap; padding: 0 20px; }
-    nav button {
-      background: var(--bg-glass);
-      border: 1px solid var(--card-border);
-      color: var(--text-secondary);
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 500;
-      padding: 10px 20px;
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
-      transition: var(--transition);
-    }
-    nav button:hover, nav button.active {
-      background: var(--accent-gradient);
-      color: white;
-      border-color: transparent;
-      transform: translateY(-2px);
-      box-shadow: var(--neon-glow);
-    }
-    .controls {
-      position: fixed; top: 20px; right: 20px; display: flex; gap: 8px; z-index: 100;
-      background: var(--bg-glass); backdrop-filter: blur(20px); padding: 8px;
-      border-radius: 16px; border: 1px solid var(--card-border);
-    }
-    .controls button {
-      padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border);
-      background: var(--bg-card); color: var(--text-secondary); cursor: pointer;
-      transition: var(--transition); min-width: 44px;
-    }
-    .controls button:hover {
-      transform: translateY(-2px) scale(1.05);
-      background: var(--accent-gradient); color: white; border-color: transparent;
-    }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 80px; }
-    section {
-      opacity: 0; transform: translateY(40px);
-      transition: opacity 0.8s, transform 0.8s;
-      margin-bottom: 80px;
-    }
-    section.visible { opacity: 1; transform: translateY(0); }
-    .section-title {
-      font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 700; margin-bottom: 40px; text-align: center;
-      background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      position: relative;
-    }
-    .section-title::after {
-      content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
-      width: 60px; height: 3px; background: var(--accent-gradient); border-radius: 2px;
-    }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-    .card {
-      background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 20px;
-      padding: 30px; backdrop-filter: blur(20px); transition: var(--transition); overflow: hidden;
-    }
-    .card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-      background: var(--accent-gradient); transform: scaleX(0); transition: transform 0.4s ease;
-    }
-    .card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: var(--shadow-lg), var(--shadow-neon);
-      border-color: rgba(96, 165, 250, 0.3);
-    }
-    .card:hover::before { transform: scaleX(1); }
-    .card h3 { font-size: 1.4rem; margin-bottom: 15px; color: var(--text-primary); }
-    .card p, .card li { color: var(--text-secondary); line-height: 1.7; }
-    .card ul { list-style: none; padding-left: 0; }
-    .card li { padding: 8px 0; padding-left: 25px; position: relative; }
-    .card li::before { content: '▹'; position: absolute; left: 0; color: var(--accent-primary); }
-    a { color: var(--accent-primary); text-decoration: none; transition: var(--transition); }
-    a:hover { color: var(--accent-secondary); }
-    footer {
-      text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 0.9rem;
-      border-top: 1px solid var(--card-border); background: var(--bg-glass); backdrop-filter: blur(10px);
-    }
-    .filter { margin-bottom: 30px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-    .filter button {
-      padding: 10px 18px; border-radius: 10px; border: 1px solid var(--card-border);
-      cursor: pointer; background: var(--bg-glass); color: var(--text-secondary);
-      font-weight: 500; transition: var(--transition); backdrop-filter: blur(10px);
-    }
-    .filter button:hover, .filter button.active {
-      background: var(--accent-gradient); color: white; border-color: transparent;
-      transform: translateY(-2px); box-shadow: var(--neon-glow);
-    }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
-    .stat-card {
-      background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 16px;
-      padding: 25px; text-align: center; backdrop-filter: blur(20px); transition: var(--transition);
-    }
-    .stat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-neon); }
-    .stat-value {
-      font-size: 2.5rem; font-weight: 800; background: var(--accent-gradient);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px;
-    }
-    .stat-label { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-top: 40px; }
-    .chart-card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 20px; padding: 25px; backdrop-filter: blur(20px); }
-    .chart-card h4 { color: var(--text-primary); margin-bottom: 20px; font-size: 1.1rem; }
-    .chart-wrapper { position: relative; height: 300px; }
-    .project-card { display: flex; flex-direction: column; height: 100%; }
-    .project-name { font-size: 1.2rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    .project-stats { display: flex; gap: 15px; font-size: 0.85rem; color: var(--text-muted); margin-top: auto; padding-top: 15px; }
-    .language-badge {
-      display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
-      border-radius: 20px; font-size: 0.8rem; background: var(--bg-glass);
-      border: 1px solid var(--card-border); margin-top: 10px;
-    }
-    .language-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .loading { display: flex; justify-content: center; align-items: center; padding: 60px; }
-    .spinner {
-      width: 50px; height: 50px; border: 3px solid var(--card-border);
-      border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @media (max-width: 768px) {
-      .controls { top: auto; bottom: 20px; right: 50%; transform: translateX(50%); }
-      .charts-container { grid-template-columns: 1fr; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LixynHay | Engineer & Researcher</title>
+    <meta name="description" content="Portfolio of LixynHay - Systems Engineer & Researcher specializing in Linux Kernel, ESP32, and Embedded Systems.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for GitHub Stats -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF for CV Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #e2e8f0;
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --nav-bg: rgba(15, 23, 42, 0.8);
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(0, 0, 0, 0.05);
+            --nav-bg: rgba(248, 250, 252, 0.8);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* Background Animation */
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .logo { font-weight: 700; font-size: 1.5rem; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--text-color); font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--primary); }
+
+        .controls { display: flex; gap: 1rem; align-items: center; }
+        button {
+            background: transparent;
+            border: 1px solid var(--card-border);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+        button:hover { background: var(--card-bg); border-color: var(--primary); }
+
+        /* Sections */
+        section {
+            min-height: 100vh;
+            padding: 6rem 2rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h1, h2, h3 { line-height: 1.2; margin-bottom: 1rem; }
+        h2 { font-size: 2.5rem; text-align: center; margin-bottom: 3rem; position: relative; }
+        h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--gradient);
+            margin: 1rem auto 0;
+            border-radius: 2px;
+        }
+
+        /* Hero Section */
+        .hero-content { text-align: center; }
+        .hero-title { font-size: 4rem; font-weight: 800; margin-bottom: 1rem; }
+        .typing-text { color: var(--primary); font-family: 'Fira Code', monospace; }
+        .hero-subtitle { font-size: 1.5rem; color: #94a3b8; margin-bottom: 2rem; }
+        
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6); }
+
+        /* About & Skills */
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+        .skills-container { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; }
+        .skill-tag {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-family: 'Fira Code', monospace;
+            transition: all 0.3s;
+        }
+        .skill-tag:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 0 10px rgba(6, 182, 212, 0.3); }
+
+        /* GitHub Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .stat-number { font-size: 2.5rem; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-label { color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .chart-wrapper {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            height: 300px;
+        }
+
+        /* Projects */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .project-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--secondary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .project-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .project-title { font-size: 1.25rem; font-weight: 600; color: var(--text-color); text-decoration: none; }
+        .project-desc { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; flex-grow: 1; }
+        .project-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #64748b; }
+        .lang-badge { display: flex; align-items: center; gap: 0.5rem; }
+        .lang-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--card-border);
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        .social-links { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; }
+        .social-links a { color: var(--text-color); font-size: 1.5rem; transition: color 0.3s; }
+        .social-links a:hover { color: var(--primary); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .about-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; } /* Simplified for mobile */
+            section { padding-top: 4rem; }
+        }
+
+        /* Animations */
+        .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+    </style>
 </head>
 <body>
-<canvas id="bg"></canvas>
-<div class="controls">
-  <button onclick="toggleTheme()" title="Тема">🌓</button>
-  <button onclick="setLang('ru')" title="Русский">RU</button>
-  <button onclick="setLang('en')" title="English">EN</button>
-  <button onclick="downloadCV()" title="CV">📄</button>
-</div>
-<header>
-  <h1 id="typed" class="typing-cursor"></h1>
-  <p data-ru="Инженер и исследователь систем" data-en="Engineer & Systems Researcher"></p>
-</header>
-<nav>
-  <button onclick="scrollToSection('home')" data-ru="Главная" data-en="Home" class="active"></button>
-  <button onclick="scrollToSection('about')" data-ru="Обо мне" data-en="About"></button>
-  <button onclick="scrollToSection('stats')" data-ru="Статистика" data-en="Stats"></button>
-  <button onclick="scrollToSection('projects')" data-ru="Проекты" data-en="Projects"></button>
-  <button onclick="scrollToSection('links')" data-ru="Контакты" data-en="Contacts"></button>
-</nav>
-<div class="container">
-  <section id="home">
-    <div class="card">
-      <h2 data-ru="👋 Добро пожаловать" data-en="👋 Welcome"></h2>
-      <p data-ru="Современное интерактивное портфолио с живыми данными из GitHub, аналитикой и проектами." data-en="A modern interactive portfolio with live GitHub data, analytics, and projects."></p>
-    </div>
-  </section>
-  <section id="about">
-    <h2 class="section-title" data-ru="Обо мне" data-en="About Me"></h2>
-    <div class="grid">
-      <div class="card">
-        <h3 data-ru="Кто я" data-en="Who I Am"></h3>
-        <p data-ru="Я увлечённый инженер и исследователь систем: Linux, Android, электроника, программирование. Люблю разбирать системы до последней детали, находить скрытые баги и понимать, как всё работает на самом низком уровне." data-en="I'm a passionate engineer and system researcher: Linux, Android, electronics, programming. I love dissecting systems to the last detail, finding hidden bugs, and understanding how everything works at the lowest level."></p>
-      </div>
-      <div class="card">
-        <h3 data-ru="Навыки" data-en="Skills"></h3>
-        <ul>
-          <li>Linux Kernel & Drivers</li>
-          <li>ESP32 / Arduino / Embedded</li>
-          <li>C / C++ / Rust Programming</li>
-          <li>Debugging & Log Analysis</li>
-          <li>Hardware & Soldering</li>
-          <li>System Architecture</li>
+    <canvas id="canvas-bg"></canvas>
+
+    <nav>
+        <div class="logo">LixynHay</div>
+        <ul class="nav-links">
+            <li><a href="#home" data-i18n="nav_home">Главная</a></li>
+            <li><a href="#about" data-i18n="nav_about">Обо мне</a></li>
+            <li><a href="#github-stats" data-i18n="nav_stats">Статистика</a></li>
+            <li><a href="#projects" data-i18n="nav_projects">Проекты</a></li>
         </ul>
-      </div>
-      <div class="card">
-        <h3 data-ru="Подход" data-en="Approach"></h3>
-        <p data-ru="Глубокое изучение систем, поиск коренной причины проблем (root cause analysis), без поверхностного анализа. Верю в силу понимания фундаментальных принципов." data-en="Deep system exploration, finding root causes without surface-level analysis. I believe in the power of understanding fundamental principles."></p>
-      </div>
-    </div>
-  </section>
-  <section id="stats">
-    <h2 class="section-title" data-ru="GitHub Статистика" data-en="GitHub Statistics"></h2>
-    <div id="statsLoading" class="loading"><div class="spinner"></div></div>
-    <div id="statsContent" style="display:none;">
-      <div class="stats-grid" id="profileStats"></div>
-      <div class="charts-container">
-        <div class="chart-card">
-          <h4 data-ru="Языки программирования" data-en="Programming Languages"></h4>
-          <div class="chart-wrapper"><canvas id="languageChart"></canvas></div>
+        <div class="controls">
+            <button id="theme-toggle" aria-label="Toggle Theme">🌙</button>
+            <button id="lang-toggle">RU</button>
         </div>
-        <div class="chart-card">
-          <h4 data-ru="Активность по репозиториям" data-en="Repository Activity"></h4>
-          <div class="chart-wrapper"><canvas id="repoActivityChart"></canvas></div>
+    </nav>
+
+    <section id="home">
+        <div class="hero-content fade-in">
+            <h1 class="hero-title">Hi, I'm <span class="typing-text"></span></h1>
+            <p class="hero-subtitle" data-i18n="hero_subtitle">Systems Engineer & Researcher</p>
+            <button class="btn-primary" onclick="generateCV()" data-i18n="btn_cv">Скачать CV</button>
         </div>
-      </div>
-    </div>
-  </section>
-  <section id="projects">
-    <h2 class="section-title" data-ru="Проекты" data-en="Projects"></h2>
-    <div class="filter" id="projectFilters"></div>
-    <div class="grid" id="projectsGrid"><div class="loading"><div class="spinner"></div></div></div>
-  </section>
-  <section id="links">
-    <h2 class="section-title" data-ru="Контакты" data-en="Contact"></h2>
-    <div class="card">
-      <ul style="list-style:none;padding-left:0;">
-        <li style="padding:15px 0;border-bottom:1px solid var(--card-border);">🐙 <strong>GitHub:</strong> <a href="https://github.com/lixynhay" target="_blank">@lixynhay</a></li>
-        <li style="padding:15px 0;border-bottom:1px solid var(--card-border);">💬 <strong>Telegram:</strong> <a href="https://t.me/lixynhay" target="_blank">@lixynhay</a></li>
-        <li style="padding:15px 0;">📧 <strong>Email:</strong> <a href="mailto:lixynhay@gmail.com">lixynhay@gmail.com</a></li>
-      </ul>
-    </div>
-  </section>
-</div>
-<footer>© <span id="year"></span> • LixynHay • Built with ❤️ and ☕</footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-(() => {
-  const $ = q => document.querySelector(q);
-  const $$ = q => document.querySelectorAll(q);
-  const on = (el, ev, fn) => el.addEventListener(ev, fn);
-  // Typewriter
-  const phrases = ["Hi!", "Hello!", "Привет!"];
-  let phraseIdx = 0, charIdx = 0, isDeleting = false;
-  function typeWriter() {
-    const current = phrases[phraseIdx];
-    typedEl.textContent = isDeleting ? current.substring(0, charIdx - 1) : current.substring(0, charIdx + 1);
-    charIdx += isDeleting ? -1 : 1;
-    let delay = isDeleting ? 50 : 100;
-    if (!isDeleting && charIdx === current.length) { delay = 2000; isDeleting = true; }
-    else if (isDeleting && charIdx === 0) { isDeleting = false; phraseIdx = (phraseIdx + 1) % phrases.length; delay = 500; }
-    setTimeout(typeWriter, delay);
-  }
-  typeWriter();
-  // Scroll
-  window.scrollToSection = id => {
-    const el = $(`#${id}`);
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + pageYOffset - 80, behavior: "smooth" });
-  };
-  on(window, "scroll", () => {
-    const pos = scrollY + 150;
-    ["home","about","stats","projects","links"].forEach(id => {
-      const sec = $(`#${id}`);
-      if (sec && pos >= sec.offsetTop && pos < sec.offsetTop + sec.offsetHeight) {
-        $$("nav button").forEach(b => b.classList.remove("active"));
-        const btn = $(`nav button[onclick="scrollToSection('${id}')"]`);
-        if (btn) btn.classList.add("active");
-      }
-    });
-  });
-  // Language
-  const RU="ru", EN="en";
-  function applyLang(lang) {
-    const l = (lang===RU||lang===EN)?lang:RU;
-    $$("[data-ru]").forEach(el => el.textContent = el.dataset[l]||el.dataset.ru);
-    localStorage.userLang = l;
-  }
-  window.setLang = applyLang;
-  async function autoLang() {
-    if (localStorage.userLang) { applyLang(localStorage.userLang); return; }
-    try {
-      const geo = await fetch("https://ipapi.co/json").then(r=>r.json());
-      if (["US","GB","CA","AU"].includes(geo.country_code)) { applyLang(EN); return; }
-    } catch(e){}
-    applyLang(navigator.language.slice(0,2).toLowerCase()==="en"?EN:RU);
-  }
-  on(document,"DOMContentLoaded",autoLang);
-  // Theme
-  function applyTheme() {
-    const stored = localStorage.theme;
-    const prefers = matchMedia("(prefers-color-scheme: light)").matches?"light":"";
-    document.body.classList.toggle("light", stored||prefers);
-  }
-  window.toggleTheme = () => {
-    document.body.classList.toggle("light");
-    localStorage.theme = document.body.classList.contains("light")?"light":"";
-  };
-  on(document,"DOMContentLoaded",applyTheme);
-  // CV
-  window.downloadCV = () => {
-    const {jsPDF}=window.jspdf;
-    const doc=new jsPDF();
-    doc.setFont("helvetica");
-    doc.setFontSize(24); doc.setTextColor(37,99,235); doc.text("LixynHay",20,30);
-    doc.setFontSize(14); doc.setTextColor(100,100,100); doc.text("Engineer & Systems Researcher",20,40);
-    doc.setDrawColor(200,200,200); doc.line(20,45,190,45);
-    doc.setFontSize(16); doc.setTextColor(0,0,0); doc.text("Skills:",20,60);
-    doc.setFontSize(12); doc.setTextColor(50,50,50);
-    ["• Linux Kernel & Drivers","• ESP32 / Arduino / Embedded","• C / C++ / Rust Programming","• Debugging & Log Analysis","• Hardware & Soldering","• System Architecture"].forEach((s,i)=>doc.text(s,25,70+i*8));
-    doc.setFontSize(16); doc.text("Contact:",20,120);
-    doc.setFontSize(12); doc.setTextColor(50,50,50);
-    doc.text("GitHub: github.com/lixynhay",25,135);
-    doc.text("Telegram: @lixynhay",25,145);
-    doc.text("Email: lixynhay@gmail.com",25,155);
-    doc.setFontSize(10); doc.setTextColor(150,150,150);
-    doc.text("Generated on "+new Date().toLocaleDateString(),20,280);
-    doc.save("LixynHay_CV.pdf");
-  };
-  // GitHub
-  const USER="lixynhay", CACHE_KEY="gh-data", TTL=600000;
-  let profileData=null, allRepos=[], langChart=null, activityChart=null;
-  async function fetchGH() {
-    const cached=sessionStorage.getItem(CACHE_KEY);
-    if(cached){const{ts,data}=JSON.parse(cached);if(Date.now()-ts<TTL)return data;}
-    try{
-      const p=await fetch(`https://api.github.com/users/${USER}`).then(r=>r.json());
-      const r=await fetch(`https://api.github.com/users/${USER}/repos?per_page=100`).then(r=>r.json());
-      const data={profile:p,repos:r};
-      sessionStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data}));
-      return data;
-    }catch(e){console.error(e);return null;}
-  }
-  function fmt(n){return n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(1)+"K":String(n);}
-  function langStats(repos){
-    const langs={};
-    repos.forEach(r=>{if(r.language)langs[r.language]=(langs[r.language]||0)+1;});
-    return Object.entries(langs).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  }
-  function activityStats(repos){
-    const now=new Date(),months=[];
-    for(let i=11;i>=0;i--){
-      const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-      months.push({label:d.toLocaleDateString("en-US",{month:"short",year:"2-digit"}),count:0});
-    }
-    repos.forEach(r=>{
-      const upd=new Date(r.updated_at);
-      const diff=(now.getFullYear()-upd.getFullYear())*12+(now.getMonth()-upd.getMonth());
-      if(diff>=0&&diff<12)months[11-diff].count++;
-    });
-    return months;
-  }
-  async function loadStats(){
-    const data=await fetchGH();
-    if(!data){$("#statsLoading").innerHTML="<p style='color:var(--text-muted)'>Failed to load</p>";return;}
-    profileData=data.profile;
-    allRepos=data.repos.filter(r=>!r.fork);
-    $("#profileStats").innerHTML=
-      `<div class="stat-card"><div class="stat-value">${fmt(profileData.public_repos)}</div><div class="stat-label" data-ru="Репозиториев" data-en="Repositories"></div></div>`+
-      `<div class="stat-card"><div class="stat-value">${fmt(profileData.followers)}</div><div class="stat-label" data-ru="Подписчиков" data-en="Followers"></div></div>`+
-      `<div class="stat-card"><div class="stat-value">${fmt(profileData.following)}</div><div class="stat-label" data-ru="Подписок" data-en="Following"></div></div>`+
-      `<div class="stat-card"><div class="stat-value">${allRepos.reduce((s,r)=>s+r.stargazers_count,0)}</div><div class="stat-label" data-ru="Всего звёзд" data-en="Total Stars"></div></div>`;
-    const ls=langStats(allRepos);
-    langChart=new Chart($("#languageChart").getContext("2d"),{
-      type:"doughnut",
-      data:{labels:ls.map(x=>x[0]),datasets:[{data:ls.map(x=>x[1]),backgroundColor:["#60a5fa","#818cf8","#c084fc","#f472b6","#fb923c","#34d399","#fbbf24","#a78bfa"],borderWidth:0,hoverOffset:10}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{color:getComputedStyle(document.body).getPropertyValue("--text-secondary"),font:{size:12},padding:15}}},cutout:"65%"}}
-    );
-    const as=activityStats(allRepos);
-    activityChart=new Chart($("#repoActivityChart").getContext("2d"),{
-      type:"bar",
-      data:{labels:as.map(x=>x.label),datasets:[{label:"Updated",data:as.map(x=>x.count),backgroundColor:"rgba(96,165,250,0.7)",borderColor:"#60a5fa",borderWidth:1,borderRadius:6}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:"rgba(255,255,255,0.05)"},ticks:{color:"var(--text-muted)"}},x:{grid:{display:false},ticks:{color:"var(--text-muted)"}}}}}
-    );
-    $("#statsLoading").style.display="none";
-    $("#statsContent").style.display="block";
-    applyLang(localStorage.userLang||"ru");
-  }
-  // Projects
-  function populateFilters(){
-    const langs=["All",...new Set(allRepos.map(r=>r.language).filter(Boolean))];
-    const div=$("#projectFilters");
-    div.innerHTML="";
-    langs.forEach((l,i)=>{
-      const btn=document.createElement("button");
-      btn.textContent=l;
-      btn.className=i===0?"active":"";
-      btn.onclick=()=>{$$("nav button").forEach(b=>b.classList.remove("active"));btn.classList.add("active");showProjects(l==="All"?null:l);};
-      div.appendChild(btn);
-    });
-  }
-  function langColor(l){
-    const c={JavaScript:"#f1e05a",TypeScript:"#3178c6",Python:"#3572A5",C:"#555555","C++":"#f34b7d",Rust:"#dea584",Go:"#00ADD8",Java:"#b07219",HTML:"#e34c26",CSS:"#563d7c",Shell:"#89e051"};
-    return c[l]||"#8b949e";
-  }
-  function showProjects(lang){
-    const grid=$("#projectsGrid");
-    grid.innerHTML="";
-    const filtered=allRepos.filter(r=>!lang||r.language===lang).sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,12);
-    if(!filtered.length){grid.innerHTML='<div class="card" style="grid-column:1/-1;text-align:center;"><p>No projects</p></div>';return;}
-    const ul=localStorage.userLang||"ru";
-    filtered.forEach(r=>{
-      const card=document.createElement("div");
-      card.className="card project-card";
-      card.innerHTML=`
-        <div class="project-name">📁 ${r.name}</div>
-        <p style="flex-grow:1;margin-bottom:15px;">${r.description||(ul==="en"?"No description":"Без описания")}</p>
-        ${r.language?`<div class="language-badge"><span class="language-dot" style="background:${langColor(r.language)}"></span>${r.language}</div>`:""}
-        <div class="project-stats"><span>⭐ ${r.stargazers_count||0}</span><span>🍴 ${r.forks_count||0}</span><span>⚠️ ${r.open_issues_count||0}</span></div>
-        <a href="${r.html_url}" target="_blank" style="margin-top:15px;display:inline-block;">${ul==="en"?"View Repository →":"Открыть репозиторий →"}</a>
-      `;
-      grid.appendChild(card);
-    });
-    applyLang(ul);
-  }
-  async function loadProjects(){
-    if(!allRepos.length){const d=await fetchGH();if(d)allRepos=d.repos.filter(r=>!r.fork);}
-    populateFilters();
-    showProjects(null);
-  }
-  // Reveal
-  const sections=$$("section");
-  const reveal=()=>{
-    const t=scrollY+innerHeight*0.75;
-    sections.forEach(s=>{if(s.offsetTop<t)s.classList.add("visible");});
-  };
-  on(window,"scroll",reveal);
-  reveal();
-  // Particles
-  const c=$("#bg"),ctx=c.getContext("2d");
-  let w,h,dpr,particles,mouse={x:null,y:null,radius:150};
-  on(window,"mousemove",e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
-  on(window,"mouseleave",()=>{mouse.x=null;mouse.y=null;});
-  function resize(){
-    w=c.clientWidth;h=c.clientHeight;dpr=devicePixelRatio||1;
-    c.width=w*dpr;c.height=h*dpr;c.style.width=w+"px";c.style.height=h+"px";
-    ctx.scale(dpr,dpr);
-    particles=Array.from({length:Math.min(100,Math.floor(w*h/15000))},()=>({
-      x:Math.random()*w,y:Math.random()*h,size:Math.random()*2+1,
-      speedX:(Math.random()-0.5)*0.5,speedY:(Math.random()-0.5)*0.5,
-      hue:Math.random()*60+200,alpha:Math.random()*0.5+0.3
-    }));
-  }
-  function draw(){
-    ctx.clearRect(0,0,w,h);
-    particles.forEach((p,i)=>{
-      p.x+=p.speedX;p.y+=p.speedY;
-      if(p.x<0||p.x>w)p.speedX*=-1;if(p.y<0||p.y>h)p.speedY*=-1;
-      if(mouse.x!==null){
-        const dx=mouse.x-p.x,dy=mouse.y-p.y,dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<mouse.radius){
-          const force=(mouse.radius-dist)/mouse.radius,angle=Math.atan2(dy,dx);
-          p.x-=Math.cos(angle)*force*2;p.y-=Math.sin(angle)*force*2;
-          p.alpha=Math.min(1,p.alpha+0.02);
-        }else p.alpha=Math.max(0.3,p.alpha-0.01);
-      }
-      ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-      ctx.fillStyle=`hsla(${p.hue},70%,60%,${p.alpha})`;ctx.fill();
-      particles.slice(i+1).forEach(p2=>{
-        const dx=p.x-p2.x,dy=p.y-p2.y,dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<120){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p2.x,p2.y);
-          ctx.strokeStyle=`hsla(${p.hue},70%,60%,${0.15*(1-dist/120)})`;ctx.lineWidth=0.5;ctx.stroke();}
-      });
-    });
-    requestAnimationFrame(draw);
-  }
-  on(window,"resize",resize);
-  resize();draw();
-  // Year
-  $("#year").textContent=new Date().getFullYear();
-  // Init
-  on(document,"DOMContentLoaded",()=>{loadStats();loadProjects();});
-})();
-</script>
+    </section>
+
+    <section id="about">
+        <h2 data-i18n="title_about">Обо мне</h2>
+        <div class="about-grid fade-in">
+            <div>
+                <p data-i18n="about_text">
+                    Я инженер-исследователь, увлеченный низкоуровневой разработкой и системным программированием. 
+                    Мой фокус — создание надежных и эффективных решений на стыке железа и софта. 
+                    От написания драйверов ядра Linux до прошивки микроконтроллеров ESP32.
+                </p>
+                <div class="skills-container">
+                    <span class="skill-tag">Linux Kernel</span>
+                    <span class="skill-tag">C/C++</span>
+                    <span class="skill-tag">Rust</span>
+                    <span class="skill-tag">ESP32/Arduino</span>
+                    <span class="skill-tag">GDB Debugging</span>
+                    <span class="skill-tag">Embedded Systems</span>
+                    <span class="skill-tag">Git</span>
+                    <span class="skill-tag">CI/CD</span>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <!-- Placeholder for potential image or additional visual -->
+                <div style="font-size: 5rem;">⚡🛠️💻</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="github-stats">
+        <h2 data-i18n="title_stats">GitHub Статистика</h2>
+        
+        <div class="stats-grid fade-in" id="main-stats">
+            <!-- Dynamic Content -->
+            <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">Repositories</div></div>
+            <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">Followers</div></div>
+            <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">Total Stars</div></div>
+            <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">Contributions</div></div>
+        </div>
+
+        <div class="charts-container fade-in">
+            <div class="chart-wrapper">
+                <canvas id="langChart"></canvas>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="repoActivityChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects">
+        <h2 data-i18n="title_projects">Проекты</h2>
+        <div class="projects-grid" id="projects-container">
+            <!-- Dynamic Projects -->
+            <div class="project-card" style="text-align:center; padding: 3rem;">
+                <p>Loading projects from GitHub...</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://github.com/LixynHay" target="_blank" aria-label="GitHub">GH</a>
+            <a href="https://t.me/yourusername" target="_blank" aria-label="Telegram">TG</a>
+            <a href="mailto:contact@example.com" aria-label="Email">✉️</a>
+        </div>
+        <p>&copy; <span id="year"></span> LixynHay. Built with ⚡ and Code.</p>
+    </footer>
+
+    <script>
+        // --- Configuration ---
+        const GITHUB_USERNAME = 'LixynHay'; // Update if needed
+        
+        // --- Translations ---
+        const i18n = {
+            ru: {
+                nav_home: "Главная", nav_about: "Обо мне", nav_stats: "Статистика", nav_projects: "Проекты",
+                hero_subtitle: "Инженер систем и исследователь",
+                btn_cv: "Скачать CV",
+                title_about: "Обо мне",
+                about_text: "Я инженер-исследователь, увлеченный низкоуровневой разработкой и системным программированием. Мой фокус — создание надежных и эффективных решений на стыке железа и софта.",
+                title_stats: "GitHub Статистика",
+                title_projects: "Проекты"
+            },
+            en: {
+                nav_home: "Home", nav_about: "About", nav_stats: "Stats", nav_projects: "Projects",
+                hero_subtitle: "Systems Engineer & Researcher",
+                btn_cv: "Download CV",
+                title_about: "About Me",
+                about_text: "I am an engineer-researcher passionate about low-level development and systems programming. My focus is on creating reliable and efficient solutions at the intersection of hardware and software.",
+                title_stats: "GitHub Statistics",
+                title_projects: "Projects"
+            }
+        };
+
+        // --- State & Init ---
+        let currentLang = navigator.language.startsWith('ru') ? 'ru' : 'en';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initTyping();
+            updateLanguage();
+            fetchGitHubData();
+            initScrollReveal();
+            initCanvas();
+            document.getElementById('year').textContent = new Date().getFullYear();
+        });
+
+        // --- Theme Toggle ---
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('theme-toggle').textContent = '☀️';
+            }
+            
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+                document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
+                document.getElementById('theme-toggle').textContent = isLight ? '🌙' : '☀️';
+                localStorage.setItem('theme', isLight ? 'dark' : 'light');
+            });
+        }
+
+        // --- Language Toggle ---
+        document.getElementById('lang-toggle').addEventListener('click', () => {
+            currentLang = currentLang === 'ru' ? 'en' : 'ru';
+            document.getElementById('lang-toggle').textContent = currentLang.toUpperCase();
+            updateLanguage();
+        });
+
+        function updateLanguage() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[currentLang][key]) el.textContent = i18n[currentLang][key];
+            });
+        }
+
+        // --- Typing Effect ---
+        function initTyping() {
+            const text = "LixynHay";
+            const element = document.querySelector('.typing-text');
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, 150);
+                }
+            }
+            type();
+        }
+
+        // --- Scroll Reveal ---
+        function initScrollReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+        }
+
+        // --- GitHub Data Fetching ---
+        async function fetchGitHubData() {
+            try {
+                // Fetch User Stats
+                const userRes = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`);
+                const userData = await userRes.json();
+                
+                // Fetch Repos
+                const reposRes = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`);
+                const reposData = await reposRes.json();
+
+                if (userData.message === 'Not Found') throw new Error('User not found');
+
+                updateStats(userData, reposData);
+                renderProjects(reposData);
+                renderCharts(reposData);
+
+            } catch (error) {
+                console.error('GitHub API Error:', error);
+                document.getElementById('main-stats').innerHTML = '<p>Error loading GitHub stats. Please check username or API limits.</p>';
+            }
+        }
+
+        function updateStats(user, repos) {
+            const totalStars = repos.reduce((acc, repo) => acc + repo.stargazers_count, 0);
+            
+            const stats = [
+                { val: user.public_repos, label: 'Repositories' },
+                { val: user.followers, label: 'Followers' },
+                { val: totalStars, label: 'Total Stars' },
+                { val: user.total_private_repos || 0, label: 'Private Repos' } // Approximation if private not visible
+            ];
+
+            const container = document.getElementById('main-stats');
+            container.innerHTML = stats.map(s => `
+                <div class="stat-card">
+                    <div class="stat-number">${s.val}</div>
+                    <div class="stat-label">${s.label}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderProjects(repos) {
+            const container = document.getElementById('projects-container');
+            // Filter out forks and sort by stars/update
+            const myRepos = repos.filter(r => !r.fork).sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 6);
+
+            if (myRepos.length === 0) {
+                container.innerHTML = '<p>No public repositories found.</p>';
+                return;
+            }
+
+            container.innerHTML = myRepos.map(repo => `
+                <div class="project-card">
+                    <div>
+                        <div class="project-header">
+                            <a href="${repo.html_url}" target="_blank" class="project-title">${repo.name}</a>
+                            <span style="font-size:1.2rem">📂</span>
+                        </div>
+                        <p class="project-desc">${repo.description || 'No description provided.'}</p>
+                    </div>
+                    <div class="project-meta">
+                        <div class="lang-badge">
+                            <span class="lang-dot" style="background:${getLangColor(repo.language)}"></span>
+                            ${repo.language || 'Code'}
+                        </div>
+                        <div>⭐ ${repo.stargazers_count}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getLangColor(lang) {
+            const colors = {
+                'JavaScript': '#f1e05a', 'Python': '#3572A5', 'C': '#555555', 
+                'C++': '#f34b7d', 'HTML': '#e34c26', 'CSS': '#563d7c',
+                'Rust': '#dea584', 'Go': '#00ADD8', 'Shell': '#89e051'
+            };
+            return colors[lang] || '#cccccc';
+        }
+
+        // --- Charts (Chart.js) ---
+        let langChartInstance = null;
+        let activityChartInstance = null;
+
+        function renderCharts(repos) {
+            // Prepare Language Data
+            const langCounts = {};
+            repos.forEach(repo => {
+                if (repo.language) {
+                    langCounts[repo.language] = (langCounts[repo.language] || 0) + 1;
+                }
+            });
+
+            // Prepare Activity Data (Last 12 months based on updated_at)
+            const monthCounts = new Array(12).fill(0);
+            const now = new Date();
+            repos.forEach(repo => {
+                const date = new Date(repo.updated_at);
+                const diffMonths = (now.getFullYear() - date.getFullYear()) * 12 + (now.getMonth() - date.getMonth());
+                if (diffMonths >= 0 && diffMonths < 12) {
+                    monthCounts[11 - diffMonths]++;
+                }
+            });
+
+            const ctxLang = document.getElementById('langChart').getContext('2d');
+            const ctxAct = document.getElementById('repoActivityChart').getContext('2d');
+
+            if (langChartInstance) langChartInstance.destroy();
+            if (activityChartInstance) activityChartInstance.destroy();
+
+            // Language Doughnut Chart
+            langChartInstance = new Chart(ctxLang, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(langCounts),
+                    datasets: [{
+                        data: Object.values(langCounts),
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#06b6d4', '#ec4899', '#f59e0b', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } },
+                        title: { display: true, text: 'Languages Distribution', color: getComputedStyle(document.body).getPropertyValue('--text-color') }
+                    }
+                }
+            });
+
+            // Activity Bar Chart
+            activityChartInstance = new Chart(ctxAct, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Repo Updates',
+                        data: monthCounts,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Activity (Last 12 Months)', color: getComputedStyle(document.body).getPropertyValue('--text-color') }
+                    }
+                }
+            });
+        }
+
+        // --- CV Generator (Simple) ---
+        function generateCV() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(22);
+            doc.text("LixynHay - CV", 20, 20);
+            
+            doc.setFontSize(12);
+            doc.text("Systems Engineer & Researcher", 20, 30);
+            
+            doc.text("Skills: Linux Kernel, C/C++, ESP32, Debugging", 20, 50);
+            doc.text("Contact: github.com/LixynHay", 20, 60);
+            
+            doc.save("LixynHay_CV.pdf");
+        }
+
+        // --- Canvas Background Animation ---
+        function initCanvas() {
+            const canvas = document.getElementById('canvas-bg');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.size = Math.random() * 2 + 1;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if (this.x < 0 || this.x > width) this.vx *= -1;
+                    if (this.y < 0 || this.y > height) this.vy *= -1;
+                }
+                draw() {
+                    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--primary');
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            for (let i = 0; i < 50; i++) particles.push(new Particle());
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+    </script>
 </body>
 </html>
