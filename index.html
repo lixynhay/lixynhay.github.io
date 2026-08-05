@@ -1,622 +1,826 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LixynHay | Engineer & Researcher</title>
-    <meta name="description" content="Portfolio of LixynHay - Systems Engineer & Researcher specializing in Linux Kernel, ESP32, and Embedded Systems.">
-    
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LixynHay | Systems Engineer & Researcher</title>
+<meta name="description" content="Портфолио LixynHay — системный инженер и исследователь. Ядро Linux, embedded, Rust, C/C++.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23060a0f'/><text x='50' y='68' font-size='58' text-anchor='middle' fill='%2300e5ff' font-family='monospace' font-weight='bold'>L</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   LIXYNHAY OS v3.8 — themes & base
+   ============================================================ */
+:root, [data-theme="dark"]{
+  --bg:#060a0f; --bg2:#0a1118; --panel:#0d1520; --border:#16222e;
+  --text:#c9d7e0; --muted:#5c7285;
+  --accent:#00e5ff; --accent2:#7c4dff; --green:#22ff88; --err:#ff5470;
+  --glow:rgba(0,229,255,.35);
+}
+[data-theme="amber"]{
+  --bg:#0d0800; --bg2:#120b01; --panel:#140d02; --border:#2a1c05;
+  --text:#ffd9a0; --muted:#8a6a3a;
+  --accent:#ffb000; --accent2:#ff6d00; --green:#ffb000; --err:#ff5440;
+  --glow:rgba(255,176,0,.35);
+}
+[data-theme="light"]{
+  --bg:#eef2f6; --bg2:#e4eaf0; --panel:#ffffff; --border:#d3dde6;
+  --text:#0f1a24; --muted:#5a6b7b;
+  --accent:#0066ff; --accent2:#7c4dff; --green:#0a8f4e; --err:#d63050;
+  --glow:rgba(0,102,255,.25);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  overflow-x:hidden; min-height:100vh;
+}
+::selection{background:var(--accent);color:var(--bg)}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+a{color:var(--accent)}
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+/* ---------- fx layers ---------- */
+#matrix{position:fixed;inset:0;z-index:0;opacity:.16;pointer-events:none}
+#scanlines{position:fixed;inset:0;z-index:60;pointer-events:none;display:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 1px,transparent 1px 3px);
+  animation:flicker 4s infinite}
+body.scanlines-on #scanlines{display:block}
+@keyframes flicker{0%,100%{opacity:.55}50%{opacity:.4}}
 
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --text-color: #e2e8f0;
-            --primary: #3b82f6;
-            --secondary: #8b5cf6;
-            --accent: #06b6d4;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --nav-bg: rgba(15, 23, 42, 0.8);
-            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
+/* ---------- boot ---------- */
+#boot{position:fixed;inset:0;background:#000;color:#33ff66;z-index:200;
+  padding:42px;font-size:14px;line-height:1.9;transition:opacity .5s;cursor:pointer}
+#boot.done{opacity:0;pointer-events:none}
+#boot-log{white-space:pre-wrap}
+#boot .bar{width:min(340px,80vw);height:12px;border:1px solid #33ff66;margin-top:18px}
+#boot-fill{height:100%;width:0;background:#33ff66;box-shadow:0 0 14px #33ff66}
+#boot .skip{position:absolute;bottom:26px;left:42px;color:#1d8a44;font-size:12px}
 
-        [data-theme="light"] {
-            --bg-color: #f8fafc;
-            --text-color: #1e293b;
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --card-border: rgba(0, 0, 0, 0.05);
-            --nav-bg: rgba(248, 250, 252, 0.8);
-        }
+/* ---------- nav ---------- */
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;
+  background:var(--bg); background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px;
+  padding:10px 20px;flex-wrap:wrap}
+.logo{font-weight:800;letter-spacing:2px;color:var(--accent);
+  text-shadow:0 0 14px var(--glow);text-decoration:none;font-size:15px}
+.nav-links{display:flex;gap:4px;margin:0 auto}
+.nav-links a{padding:6px 13px;font-size:13px;color:var(--muted);text-decoration:none;
+  border:1px solid transparent;border-radius:6px;transition:.2s;white-space:nowrap}
+.nav-links a:hover,.nav-links a.active{color:var(--accent);border-color:var(--border);background:var(--panel)}
+.nav-status{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.pill{border:1px solid var(--border);background:var(--panel);padding:4px 9px;border-radius:6px}
+.pill b{color:var(--green);font-weight:600}
+.icon-btn{cursor:pointer;font:inherit;color:var(--muted);transition:.2s}
+.icon-btn:hover{color:var(--accent);border-color:var(--accent)}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            transition: background-color 0.3s, color 0.3s;
-            overflow-x: hidden;
-        }
+/* ---------- layout ---------- */
+main{position:relative;z-index:1}
+section{max-width:1200px;margin:0 auto;padding:110px 20px 30px;scroll-margin-top:80px}
+.sec-title{font-size:clamp(22px,3.4vw,34px);font-weight:800;letter-spacing:1px}
+.sec-title .num{color:var(--accent);opacity:.75;font-size:.65em;margin-right:12px;vertical-align:middle}
+.sec-sub{color:var(--muted);font-size:14px;margin:6px 0 38px}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .6s,transform .6s}
+.reveal.visible{opacity:1;transform:none}
 
-        #canvas-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.4;
-        }
+/* ---------- hero ---------- */
+.hero{min-height:100vh;display:grid;place-items:center;padding:120px 20px 40px}
+.hero-grid{max-width:1200px;width:100%;display:grid;grid-template-columns:1.05fr 1fr;gap:44px;align-items:center}
+.kicker{color:var(--muted);font-size:13px;letter-spacing:3px;margin-bottom:14px}
+.kicker::before{content:'> ';color:var(--green)}
+h1.glitch{font-size:clamp(42px,7vw,86px);font-weight:800;letter-spacing:6px;line-height:1;
+  position:relative;color:var(--text)}
+h1.glitch::before,h1.glitch::after{content:attr(data-text);position:absolute;inset:0;opacity:0}
+h1.glitch:hover::before{opacity:.8;color:var(--accent);animation:gl1 .3s infinite;clip-path:inset(20% 0 40% 0)}
+h1.glitch:hover::after{opacity:.8;color:var(--err);animation:gl2 .3s infinite reverse;clip-path:inset(60% 0 10% 0)}
+@keyframes gl1{0%{transform:translate(0)}25%{transform:translate(-4px,2px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-2px,1px)}100%{transform:translate(0)}}
+@keyframes gl2{0%{transform:translate(0)}25%{transform:translate(4px,-2px)}50%{transform:translate(-3px,1px)}75%{transform:translate(2px,-1px)}100%{transform:translate(0)}}
+.tagline{margin:18px 0 10px;font-size:clamp(15px,2vw,20px);color:var(--accent);min-height:1.6em}
+.tagline .cursor{animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.hero-desc{color:var(--muted);font-size:14px;line-height:1.8;max-width:520px;margin-bottom:26px}
+.btn-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;font:inherit;font-size:14px;
+  border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:8px;
+  cursor:pointer;text-decoration:none;transition:.2s}
+.btn:hover{background:var(--accent);color:var(--bg);box-shadow:0 0 26px var(--glow)}
+.btn.ghost{border-color:var(--border);color:var(--text)}
+.btn.ghost:hover{border-color:var(--accent);color:var(--bg);background:var(--accent)}
 
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 1rem 2rem;
-            background: var(--nav-bg);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--card-border);
-        }
+/* ---------- terminal windows ---------- */
+.term-window{background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+.term-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.dot{width:12px;height:12px;border-radius:50%}
+.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+.term-title{margin:0 auto;font-size:12px;color:var(--muted)}
+.term-body{padding:16px 18px;font-size:13.5px;line-height:1.8;min-height:280px}
+.t-line{white-space:pre-wrap;word-break:break-word}
+.t-prompt{color:var(--green)}
+.t-cmd{color:var(--text)}
+.t-out{color:var(--muted)}
+.t-ok{color:var(--green)}
+.t-err{color:var(--err)}
+.t-accent{color:var(--accent)}
+.term-pre{white-space:pre;overflow-x:auto;font-size:11px;line-height:1.25;color:var(--accent)}
 
-        .logo { font-weight: 700; font-size: 1.5rem; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .nav-links { display: flex; gap: 2rem; list-style: none; }
-        .nav-links a { text-decoration: none; color: var(--text-color); font-weight: 500; transition: color 0.3s; }
-        .nav-links a:hover { color: var(--primary); }
+/* ---------- interactive terminal ---------- */
+#term-out{max-height:430px;overflow-y:auto;padding:16px 18px;font-size:13.5px;line-height:1.8;cursor:text}
+#term-line{display:flex;gap:8px;padding:10px 18px 16px;border-top:1px dashed var(--border)}
+#term-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font:inherit;font-size:13.5px;caret-color:var(--accent)}
 
-        .controls { display: flex; gap: 1rem; align-items: center; }
-        button {
-            background: transparent;
-            border: 1px solid var(--card-border);
-            color: var(--text-color);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: 'Inter', sans-serif;
-        }
-        button:hover { background: var(--card-bg); border-color: var(--primary); }
+/* ---------- about ---------- */
+.about-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:44px}
+.about-text{color:var(--muted);font-size:15px;line-height:2;margin-bottom:28px}
+.about-text b{color:var(--text)}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:1px solid var(--border);background:var(--panel);padding:8px 15px;border-radius:999px;
+  font-size:13px;transition:.2s;cursor:default}
+.chip:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 16px var(--glow);transform:translateY(-2px)}
+.focus-card{display:flex;gap:14px;align-items:flex-start;border:1px solid var(--border);
+  background:var(--panel);padding:18px;border-radius:10px;margin-bottom:14px;transition:.2s}
+.focus-card:hover{border-color:var(--accent);transform:translateX(6px)}
+.focus-card .ico{font-size:22px;filter:drop-shadow(0 0 8px var(--glow))}
+.focus-card h4{color:var(--accent);font-size:14px;margin-bottom:4px}
+.focus-card p{color:var(--muted);font-size:13px;line-height:1.6}
 
-        section {
-            min-height: 100vh;
-            padding: 6rem 2rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+/* ---------- stats ---------- */
+.stats-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:34px}
+.stat-card{border:1px solid var(--border);background:var(--panel);padding:24px 20px;border-radius:10px;
+  position:relative;overflow:hidden;transition:.25s}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.7}
+.stat-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.stat-value{font-size:clamp(28px,3.4vw,42px);font-weight:800;color:var(--accent);text-shadow:0 0 20px var(--glow)}
+.stat-label{color:var(--muted);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-top:6px}
+.gh-note{color:var(--muted);font-size:12px;margin-bottom:20px}
+.lang-title{font-size:13px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.langbar{display:flex;height:14px;border-radius:7px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px}
+.langbar i{display:block;height:100%}
+.lang-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-bottom:30px}
+.lang-legend .sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.activity-row{display:flex;justify-content:space-between;gap:12px;padding:10px 14px;
+  border:1px solid var(--border);border-left:3px solid var(--green);background:var(--panel);
+  border-radius:6px;margin-bottom:8px;font-size:13px}
+.activity-row .ago{color:var(--muted);white-space:nowrap}
 
-        h1, h2, h3 { line-height: 1.2; margin-bottom: 1rem; }
-        h2 { font-size: 2.5rem; text-align: center; margin-bottom: 3rem; position: relative; }
-        h2::after {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 4px;
-            background: var(--gradient);
-            margin: 1rem auto 0;
-            border-radius: 2px;
-        }
+/* ---------- projects ---------- */
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.card{display:flex;flex-direction:column;gap:10px;border:1px solid var(--border);background:var(--panel);
+  padding:22px;border-radius:12px;text-decoration:none;color:var(--text);transition:.25s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;inset:0;transform:translateX(-110%);
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.05),transparent);transition:transform .6s}
+.card:hover::before{transform:translateX(110%)}
+.card:hover{border-color:var(--accent);transform:translateY(-5px);box-shadow:0 14px 34px rgba(0,0,0,.4)}
+.card-head{display:flex;justify-content:space-between;gap:10px}
+.card-name{color:var(--accent);font-weight:600}
+.card-stars{color:var(--muted);font-size:13px;white-space:nowrap}
+.card-desc{color:var(--muted);font-size:13px;line-height:1.7;flex:1}
+.card-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted)}
+.lang-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.demo-badge{position:absolute;top:12px;right:-26px;transform:rotate(38deg);background:var(--err);
+  color:#fff;font-size:10px;letter-spacing:2px;padding:3px 30px}
+.more-row{margin-top:26px;text-align:center}
 
-        .hero-content { text-align: center; }
-        .hero-title { font-size: 4rem; font-weight: 800; margin-bottom: 1rem; }
-        .typing-text { color: var(--primary); font-family: 'Fira Code', monospace; }
-        .hero-subtitle { font-size: 1.5rem; color: #94a3b8; margin-bottom: 2rem; }
-        
-        .btn-primary {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6); }
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--border);margin-top:80px;padding:44px 20px;text-align:center;
+  color:var(--muted);font-size:13px;line-height:2.2;position:relative;z-index:1}
+.socials{display:flex;justify-content:center;gap:14px;margin-bottom:14px}
+.socials a{border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:8px;
+  text-decoration:none;transition:.2s;font-size:13px}
+.socials a:hover{color:var(--accent);border-color:var(--accent);box-shadow:0 0 18px var(--glow)}
+.hintline{font-size:11px;opacity:.6}
+kbd{border:1px solid var(--border);border-bottom-width:2px;border-radius:4px;padding:1px 6px;font-size:11px;background:var(--panel)}
 
-        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
-        .skills-container { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; }
-        .skill-tag {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-family: 'Fira Code', monospace;
-            transition: all 0.3s;
-        }
-        .skill-tag:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 0 10px rgba(6, 182, 212, 0.3); }
+/* ---------- palette ---------- */
+#palette{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+  display:flex;justify-content:center;align-items:flex-start;padding-top:14vh}
+#palette[hidden]{display:none}
+.palette-box{width:min(580px,92vw);background:var(--panel);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.6)}
+#palette-input{width:100%;background:transparent;border:none;outline:none;color:var(--text);
+  font:inherit;font-size:15px;padding:16px 18px;border-bottom:1px solid var(--border)}
+.palette-list{max-height:330px;overflow-y:auto}
+.palette-item{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:12px 18px;color:var(--muted);cursor:pointer;font-size:14px}
+.palette-item.sel,.palette-item:hover{background:var(--bg2);color:var(--text);border-left:3px solid var(--accent)}
+.palette-empty{padding:18px;color:var(--muted);font-size:13px}
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-        .stat-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            padding: 1.5rem;
-            border-radius: 16px;
-            text-align: center;
-            backdrop-filter: blur(5px);
-            transition: transform 0.3s;
-        }
-        .stat-card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .stat-number { font-size: 2.5rem; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .stat-label { color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+/* ---------- toast / glitch / godmode ---------- */
+#toast{position:fixed;right:20px;bottom:20px;z-index:150;background:var(--panel);
+  border:1px solid var(--accent);color:var(--text);padding:12px 20px;border-radius:8px;
+  box-shadow:0 0 26px var(--glow);transform:translateY(180%);transition:transform .3s;font-size:13px}
+#toast.show{transform:none}
+body.glitching{animation:bodygl .1s infinite}
+@keyframes bodygl{0%{filter:none;transform:none}30%{filter:hue-rotate(120deg) contrast(1.4);transform:translate(2px,-1px)}60%{filter:invert(.1) hue-rotate(-80deg);transform:translate(-2px,1px)}100%{filter:none;transform:none}}
+body.godmode{animation:hue 1.6s linear infinite}
+@keyframes hue{to{filter:hue-rotate(360deg)}}
 
-        .charts-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-        .chart-wrapper {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            position: relative;
-            height: 300px;
-        }
-
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-        .project-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .project-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--secondary);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-        .project-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-        .project-title { font-size: 1.25rem; font-weight: 600; color: var(--text-color); text-decoration: none; }
-        .project-desc { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; flex-grow: 1; }
-        .project-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #64748b; }
-        .lang-badge { display: flex; align-items: center; gap: 0.5rem; }
-        .lang-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-
-        footer {
-            text-align: center;
-            padding: 2rem;
-            border-top: 1px solid var(--card-border);
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-        .social-links { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; }
-        .social-links a { color: var(--text-color); font-size: 1.5rem; transition: color 0.3s; }
-        .social-links a:hover { color: var(--primary); }
-
-        @media (max-width: 768px) {
-            .hero-title { font-size: 2.5rem; }
-            .about-grid { grid-template-columns: 1fr; }
-            .nav-links { display: none; }
-            section { padding-top: 4rem; }
-        }
-
-        .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
-        .fade-in.visible { opacity: 1; transform: translateY(0); }
-    </style>
+/* ---------- responsive ---------- */
+@media (max-width:980px){
+  .hero-grid,.about-grid{grid-template-columns:1fr}
+  .stats-cards{grid-template-columns:repeat(2,1fr)}
+  .nav-links{order:3;width:100%;overflow-x:auto;padding-bottom:4px}
+  .nav-status .pill.hide-m{display:none}
+}
+@media (max-width:560px){
+  .nav-status .pill.hide-s{display:none}
+  section{padding-top:90px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
 </head>
 <body>
-    <canvas id="canvas-bg"></canvas>
 
-    <nav>
-        <div class="logo">LixynHay</div>
-        <ul class="nav-links">
-            <li><a href="#home" data-i18n="nav_home">Главная</a></li>
-            <li><a href="#about" data-i18n="nav_about">Обо мне</a></li>
-            <li><a href="#github-stats" data-i18n="nav_stats">Статистика</a></li>
-            <li><a href="#projects" data-i18n="nav_projects">Проекты</a></li>
-        </ul>
-        <div class="controls">
-            <button id="theme-toggle" aria-label="Toggle Theme">🌙</button>
-            <button id="lang-toggle">RU</button>
+<canvas id="matrix"></canvas>
+<div id="scanlines"></div>
+
+<!-- BOOT -->
+<div id="boot">
+  <div id="boot-log"></div>
+  <div class="bar"><div id="boot-fill"></div></div>
+  <div class="skip">[ нажмите любую клавишу или кликните, чтобы пропустить ]</div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#home">LIXYNHAY://OS</a>
+    <div class="nav-links">
+      <a href="#home" class="active">Главная</a>
+      <a href="#terminal">Терминал</a>
+      <a href="#about">Обо мне</a>
+      <a href="#stats">Статистика</a>
+      <a href="#projects">Проекты</a>
+    </div>
+    <div class="nav-status">
+      <span class="pill hide-s">FPS <b id="fps">60</b></span>
+      <span class="pill hide-m">CPU <b id="cpu">4%</b></span>
+      <span class="pill hide-s">UP <b id="uptime">00:00:00</b></span>
+      <span class="pill"><b id="clock">--:--:--</b></span>
+      <button class="pill icon-btn" id="theme-btn" title="Сменить тему">◐ <span id="theme-label">DARK</span></button>
+      <button class="pill icon-btn" id="palette-btn" title="Палитра команд">⌘K</button>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-grid">
+      <div>
+        <div class="kicker">session established · uid=1000</div>
+        <h1 class="glitch" data-text="LIXYNHAY">LIXYNHAY</h1>
+        <div class="tagline"><span id="role-text"></span><span class="cursor">█</span></div>
+        <p class="hero-desc">
+          Инженер-исследователь. Увлечён низкоуровневой разработкой и системным
+          программированием. Мой фокус — создание надёжных и эффективных решений
+          на стыке железа и софта: от драйверов ядра Linux до прошивок ESP32.
+        </p>
+        <div class="btn-row">
+          <button class="btn" id="cv-btn">⬇ Скачать CV</button>
+          <a class="btn ghost" href="https://github.com/lixynhay" target="_blank" rel="noopener">GitHub ↗</a>
+          <a class="btn ghost" href="#terminal">▶ Терминал</a>
         </div>
-    </nav>
-
-    <section id="home">
-        <div class="hero-content fade-in">
-            <h1 class="hero-title">Hi, I'm <span class="typing-text"></span></h1>
-            <p class="hero-subtitle" data-i18n="hero_subtitle">Systems Engineer & Researcher</p>
-            <button class="btn-primary" onclick="generateCV()" data-i18n="btn_cv">Скачать CV</button>
+        <div class="chips">
+          <span class="chip">🐧 Linux Kernel</span><span class="chip">C/C++</span>
+          <span class="chip">🦀 Rust</span><span class="chip">ESP32/Arduino</span>
+          <span class="chip">🐞 GDB</span><span class="chip">⚙️ CI/CD</span>
         </div>
-    </section>
+      </div>
+      <div class="term-window">
+        <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="term-title">lixynhay@lixy: ~/intro</span></div>
+        <div class="term-body" id="hero-term"></div>
+      </div>
+    </div>
+  </section>
 
-    <section id="about">
-        <h2 data-i18n="title_about">Обо мне</h2>
-        <div class="about-grid fade-in">
-            <div>
-                <p data-i18n="about_text">
-                    Я инженер-исследователь, увлеченный низкоуровневой разработкой и системным программированием. 
-                    Мой фокус — создание надежных и эффективных решений на стыке железа и софта. 
-                    От написания драйверов ядра Linux до прошивки микроконтроллеров ESP32.
-                </p>
-                <div class="skills-container">
-                    <span class="skill-tag">Linux Kernel</span>
-                    <span class="skill-tag">C/C++</span>
-                    <span class="skill-tag">Rust</span>
-                    <span class="skill-tag">ESP32/Arduino</span>
-                    <span class="skill-tag">GDB Debugging</span>
-                    <span class="skill-tag">Embedded Systems</span>
-                    <span class="skill-tag">Git</span>
-                    <span class="skill-tag">CI/CD</span>
-                </div>
-            </div>
-            <div style="text-align: center;">
-                <div style="font-size: 5rem;">⚡🛠️💻</div>
-            </div>
+  <!-- TERMINAL -->
+  <section id="terminal">
+    <h2 class="sec-title reveal"><span class="num">01</span>ТЕРМИНАЛ</h2>
+    <p class="sec-sub reveal">Полноценная командная строка. Введите <b>help</b> — и понеслось.</p>
+    <div class="term-window reveal">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="term-title">lixy-term v3.8 — /dev/tty1</span></div>
+      <div id="term-out" tabindex="0"></div>
+      <div id="term-line">
+        <span class="t-prompt">lixynhay@lixy:~$</span>
+        <input id="term-input" autocomplete="off" spellcheck="false" aria-label="Терминал">
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <h2 class="sec-title reveal"><span class="num">02</span>ОБО МНЕ</h2>
+    <p class="sec-sub reveal">cat /home/lixynhay/about.txt</p>
+    <div class="about-grid">
+      <div class="reveal">
+        <p class="about-text">
+          Я инженер-исследователь, увлечённый <b>низкоуровневой разработкой</b> и
+          <b>системным программированием</b>. Мой фокус — создание надёжных и
+          эффективных решений на стыке железа и софта.<br><br>
+          От написания <b>драйверов ядра Linux</b> до прошивки микроконтроллеров
+          <b>ESP32</b> — мне интересно всё, где код встречается с кремнием.
+          Люблю разбираться, как вещи работают под капотом, и чинить то,
+          что другие считают несуществующим.
+        </p>
+        <div class="chips">
+          <span class="chip">Linux Kernel</span><span class="chip">C/C++</span><span class="chip">Rust</span>
+          <span class="chip">ESP32/Arduino</span><span class="chip">GDB Debugging</span>
+          <span class="chip">Embedded Systems</span><span class="chip">Git</span><span class="chip">CI/CD</span>
         </div>
-    </section>
+      </div>
+      <div>
+        <div class="focus-card reveal"><span class="ico">🐧</span><div><h4>Ядро Linux</h4><p>Драйверы, модули, отладка через GDB, чтение исходников вместо новостей.</p></div></div>
+        <div class="focus-card reveal"><span class="ico">🦀</span><div><h4>Rust</h4><p>Безопасность памяти без сборщика мусора. Там, где C уже страшно, а Python ещё нельзя.</p></div></div>
+        <div class="focus-card reveal"><span class="ico">🔌</span><div><h4>Embedded</h4><p>ESP32, Arduino, регистры, прерывания, осциллограф и немного магии.</p></div></div>
+        <div class="focus-card reveal"><span class="ico">🔬</span><div><h4>Исследования</h4><p>Reverse engineering, бенчмарки, эксперименты. Если что-то можно сломать — я выясню как.</p></div></div>
+      </div>
+    </div>
+  </section>
 
-    <section id="github-stats">
-        <h2 data-i18n="title_stats">GitHub Статистика</h2>
-        
-        <div class="stats-grid fade-in" id="main-stats">
-            <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">Repositories</div></div>
-            <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">Followers</div></div>
-            <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">Total Stars</div></div>
-            <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">Contributions</div></div>
-        </div>
+  <!-- STATS -->
+  <section id="stats">
+    <h2 class="sec-title reveal"><span class="num">03</span>GITHUB СТАТИСТИКА</h2>
+    <p class="sec-sub reveal">curl -s api.github.com/users/lixynhay | jq '.stats'  ·  данные живые</p>
+    <p class="gh-note" id="gh-note"></p>
+    <div class="stats-cards">
+      <div class="stat-card reveal"><div class="stat-value" id="st-repos">0</div><div class="stat-label">Репозитории</div></div>
+      <div class="stat-card reveal"><div class="stat-value" id="st-followers">0</div><div class="stat-label">Фолловеры</div></div>
+      <div class="stat-card reveal"><div class="stat-value" id="st-stars">0</div><div class="stat-label">Всего звёзд</div></div>
+      <div class="stat-card reveal"><div class="stat-value" id="st-langs">0</div><div class="stat-label">Языки</div></div>
+    </div>
+    <div class="reveal">
+      <div class="lang-title">Распределение языков</div>
+      <div class="langbar" id="langbar"></div>
+      <div class="lang-legend" id="lang-legend"></div>
+      <div class="lang-title">Последняя активность</div>
+      <div id="activity"></div>
+    </div>
+  </section>
 
-        <div class="charts-container fade-in">
-            <div class="chart-wrapper">
-                <canvas id="langChart"></canvas>
-            </div>
-            <div class="chart-wrapper">
-                <canvas id="repoActivityChart"></canvas>
-            </div>
-        </div>
-    </section>
+  <!-- PROJECTS -->
+  <section id="projects">
+    <h2 class="sec-title reveal"><span class="num">04</span>ПРОЕКТЫ</h2>
+    <p class="sec-sub reveal">git clone --depth=1 https://github.com/lixynhay/awesome</p>
+    <div class="projects-grid" id="projects-grid">
+      <div class="t-out">Загрузка проектов с GitHub…</div>
+    </div>
+    <div class="more-row reveal">
+      <a class="btn ghost" href="https://github.com/lixynhay?tab=repositories" target="_blank" rel="noopener">Все репозитории →</a>
+    </div>
+  </section>
+</main>
 
-    <section id="projects">
-        <h2 data-i18n="title_projects">Проекты</h2>
-        <div class="projects-grid" id="projects-container">
-            <div class="project-card" style="text-align:center; padding: 3rem;">
-                <p>Loading projects from GitHub...</p>
-            </div>
-        </div>
-    </section>
+<footer>
+  <div class="socials">
+    <a href="https://github.com/lixynhay" target="_blank" rel="noopener">GH</a>
+    <a href="https://t.me/lixynhay" target="_blank" rel="noopener">TG</a>
+    <a href="mailto:lixynhay@gmail.com">✉️ EMAIL</a>
+  </div>
+  © <span id="year"></span> LixynHay. Built with ⚡, Qwen и чистым HTML/CSS/JS — без единого фреймворка.<br>
+  <span class="hintline">Подсказка: <kbd>Ctrl</kbd>+<kbd>K</kbd> — палитра команд · терминал знает больше, чем кажется · а Konami-код всё ещё работает</span>
+</footer>
 
-    <footer>
-        <div class="social-links">
-            <a href="https://github.com/lixynhay" target="_blank" aria-label="GitHub">GH</a>
-            <a href="https://t.me/lixynhay" target="_blank" aria-label="Telegram">TG</a>
-            <a href="mailto:lixynhay@gmail.com" aria-label="Email">✉️</a>
-        </div>
-        <p>&copy; <span id="year"></span> LixynHay. Built with ⚡ and Code.</p>
-    </footer>
+<!-- COMMAND PALETTE -->
+<div id="palette" hidden>
+  <div class="palette-box">
+    <input id="palette-input" placeholder="Введите команду… (Esc — закрыть)">
+    <div class="palette-list" id="palette-list"></div>
+  </div>
+</div>
 
-    <script>
-        const GITHUB_USERNAME = 'LixynHay';
-        
-        const i18n = {
-            ru: {
-                nav_home: "Главная", nav_about: "Обо мне", nav_stats: "Статистика", nav_projects: "Проекты",
-                hero_subtitle: "Инженер систем и исследователь",
-                btn_cv: "Скачать CV",
-                title_about: "Обо мне",
-                about_text: "Я инженер-исследователь, увлеченный низкоуровневой разработкой и системным программированием. Мой фокус — создание надежных и эффективных решений на стыке железа и софта.",
-                title_stats: "GitHub Статистика",
-                title_projects: "Проекты"
-            },
-            en: {
-                nav_home: "Home", nav_about: "About", nav_stats: "Stats", nav_projects: "Projects",
-                hero_subtitle: "Systems Engineer & Researcher",
-                btn_cv: "Download CV",
-                title_about: "About Me",
-                about_text: "I am an engineer-researcher passionate about low-level development and systems programming. My focus is on creating reliable and efficient solutions at the intersection of hardware and software.",
-                title_stats: "GitHub Statistics",
-                title_projects: "Projects"
-            }
-        };
+<div id="toast"></div>
 
-        let currentLang = navigator.language.startsWith('ru') ? 'ru' : 'en';
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            initTheme();
-            initTyping();
-            updateLanguage();
-            fetchGitHubData();
-            initScrollReveal();
-            initCanvas();
-            document.getElementById('year').textContent = new Date().getFullYear();
-        });
+<script>
+'use strict';
+/* ============================================================
+   LIXYNHAY OS — core
+   ============================================================ */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const VERSION='3.8.0-max';
+const CFG={gh:'https://github.com/lixynhay',tg:'https://t.me/lixynhay',mail:'mailto:lixynhay@gmail.com',user:'lixynhay'};
+const store={get:(k,d)=>localStorage.getItem(k)??d,set:(k,v)=>localStorage.setItem(k,v)};
 
-        function initTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
-                document.documentElement.setAttribute('data-theme', 'light');
-                document.getElementById('theme-toggle').textContent = '☀️';
-            }
-            
-            document.getElementById('theme-toggle').addEventListener('click', () => {
-                const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-                document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
-                document.getElementById('theme-toggle').textContent = isLight ? '🌙' : '☀️';
-                localStorage.setItem('theme', isLight ? 'dark' : 'light');
-            });
-        }
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 
-        document.getElementById('lang-toggle').addEventListener('click', () => {
-            currentLang = currentLang === 'ru' ? 'en' : 'ru';
-            document.getElementById('lang-toggle').textContent = currentLang.toUpperCase();
-            updateLanguage();
-        });
+/* ---------- sound (Web Audio, no files) ---------- */
+const SFX={ctx:null,on:store.get('lixy_sound','0')==='1',
+  init(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}},
+  beep(f=520,d=.05,type='square',g=.02){if(!this.on)return;this.init();const c=this.ctx;if(!c)return;
+    if(c.state==='suspended')c.resume();const o=c.createOscillator(),v=c.createGain();
+    o.type=type;o.frequency.value=f;v.gain.value=g;o.connect(v);v.connect(c.destination);o.start();
+    v.gain.exponentialRampToValueAtTime(.0001,c.currentTime+d);o.stop(c.currentTime+d);},
+  key(){this.beep(480+Math.random()*240,.03,'square',.012)},
+  ok(){this.beep(880,.09,'sine',.03)},
+  err(){this.beep(130,.22,'sawtooth',.04)}};
 
-        function updateLanguage() {
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (i18n[currentLang][key]) el.textContent = i18n[currentLang][key];
-            });
-        }
+/* ---------- matrix rain ---------- */
+const MATRIX={cv:$('#matrix'),ctx:null,running:false,drops:[],last:0,
+  chars:'アイウエオカキクケコサシスセソタチツテトナニヌネノ01<>/{}[]#$%&*+=?',
+  init(){this.ctx=this.cv.getContext('2d');
+    addEventListener('resize',()=>this.resize());
+    this.running=store.get('lixy_matrix','1')==='1'&&!REDUCED;
+    if(this.running)this.start();},
+  resize(){this.cv.width=innerWidth;this.cv.height=innerHeight;
+    const cols=Math.floor(innerWidth/16);
+    this.drops=Array.from({length:cols},()=>Math.random()*-60);},
+  recolor(){},
+  start(){this.resize();this.cv.style.display='block';},
+  stop(){this.cv.style.display='none';},
+  toggle(v){this.running=v??!this.running;store.set('lixy_matrix',this.running?'1':'0');
+    this.running?this.start():this.stop();},
+  frame(t){if(!this.running||t-this.last<45)return;this.last=t;
+    const x=this.ctx,cs=getComputedStyle(document.documentElement);
+    const bg=cs.getPropertyValue('--bg').trim(),ac=cs.getPropertyValue('--accent').trim();
+    x.fillStyle=bg+'E6';x.fillRect(0,0,this.cv.width,this.cv.height);
+    x.fillStyle=ac;x.font='14px monospace';
+    for(let i=0;i<this.drops.length;i++){
+      const ch=this.chars[Math.random()*this.chars.length|0];
+      x.fillText(ch,i*16,this.drops[i]*16);
+      if(this.drops[i]*16>this.cv.height&&Math.random()>.975)this.drops[i]=0;
+      this.drops[i]++;}}};
 
-        function initTyping() {
-            const text = "LixynHay";
-            const element = document.querySelector('.typing-text');
-            let i = 0;
-            function type() {
-                if (i < text.length) {
-                    element.textContent += text.charAt(i);
-                    i++;
-                    setTimeout(type, 150);
-                }
-            }
-            type();
-        }
+/* ---------- theme ---------- */
+const THEMES=['dark','amber','light'];
+function applyTheme(t,quiet){document.documentElement.dataset.theme=t;store.set('lixy_theme',t);
+  $('#theme-label').textContent=t.toUpperCase();if(!quiet)toast('Тема: '+t.toUpperCase());}
+function cycleTheme(){const i=THEMES.indexOf(document.documentElement.dataset.theme);
+  applyTheme(THEMES[(i+1)%THEMES.length]);}
 
-        function initScrollReveal() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.1 });
-            
-            document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-        }
+/* ---------- scanlines / sound toggles ---------- */
+function applyScanlines(){document.body.classList.toggle('scanlines-on',store.get('lixy_scan','0')==='1');}
+function toggleScanlines(v){const nv=v??!(store.get('lixy_scan','0')==='1');
+  store.set('lixy_scan',nv?'1':'0');applyScanlines();toast('Scanlines: '+(nv?'ON':'OFF'));}
+function toggleSound(v){SFX.on=v??!SFX.on;store.set('lixy_sound',SFX.on?'1':'0');
+  toast('Звук: '+(SFX.on?'ON':'OFF'));if(SFX.on)SFX.ok();}
 
-        async function fetchGitHubData() {
-            try {
-                const userRes = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`);
-                const userData = await userRes.json();
-                
-                const reposRes = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`);
-                const reposData = await reposRes.json();
+/* ---------- boot sequence ---------- */
+const BOOT_LINES=[
+'LIXY-BIOS v3.8.4 — QWEN CORE INIT',
+'CPU0: LixynHay Neural Engine @ 4.20GHz ............ OK',
+'Memory Test: 65536 MB ............................. OK',
+'Detecting drives: /dev/portfolio .................. OK',
+'Loading modules: [skills] [projects] [github] ..... OK',
+'Starting services: github-api nginx coffee-daemon . OK',
+'Applying theme: '+store.get('lixy_theme','dark')+' .............................. OK',
+'Mounting interface /dev/ui0 ....................... OK',
+'',
+'>> BOOTING LIXYNHAY OS…'];
+async function boot(){const ov=$('#boot');
+  if(REDUCED){ov.remove();return;}
+  const log=$('#boot-log'),fill=$('#boot-fill');let skipped=false;
+  const finish=()=>{if(skipped)return;skipped=true;ov.classList.add('done');setTimeout(()=>ov.remove(),520);};
+  ov.addEventListener('click',finish);
+  addEventListener('keydown',function sk(){finish();removeEventListener('keydown',sk);});
+  for(let i=0;i<BOOT_LINES.length;i++){if(skipped)break;
+    log.textContent+=BOOT_LINES[i]+'\n';
+    fill.style.width=((i+1)/BOOT_LINES.length*100)+'%';
+    SFX.beep(180+i*70,.03,'square',.01);
+    await sleep(80+Math.random()*130);}
+  await sleep(350);finish();}
 
-                if (userData.message === 'Not Found') throw new Error('User not found');
+/* ---------- hero: auto terminal + role typing ---------- */
+const HERO_SCRIPT=[
+  ['whoami','lixynhay — systems engineer & researcher'],
+  ['uname -a','LixOS 6.9.42-lixy x86_64 GNU/Linux'],
+  ['./init --mission','[ kernel ]  [ embedded ]  [ rust ]  [ research ]'],
+  ['echo $FOCUS','low-level engineering: от драйверов ядра до прошивок ESP32'],
+];
+async function typeInto(el,text,speed=28){for(const ch of text){el.textContent+=ch;await sleep(speed);}}
+async function heroTermLoop(){const out=$('#hero-term');
+  if(REDUCED){out.innerHTML=HERO_SCRIPT.map(([c,r])=>
+    `<div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">${esc(c)}</span></div><div class="t-out">${esc(r)}</div>`).join('');return;}
+  for(;;){out.innerHTML='';
+    for(const [cmd,res] of HERO_SCRIPT){
+      const line=document.createElement('div');line.className='t-line';
+      line.innerHTML='<span class="t-prompt">lixynhay@lixy:~$ </span><span class="t-cmd"></span>';
+      out.appendChild(line);SFX.key();
+      await typeInto(line.querySelector('.t-cmd'),cmd,45);
+      await sleep(280);
+      const o=document.createElement('div');o.className='t-out';out.appendChild(o);
+      await typeInto(o,res,16);await sleep(950);}
+    await sleep(2600);}}
+const ROLES=['Systems Engineer & Researcher','Linux Kernel Hacker','Embedded Developer','Rustacean','Low-Level Enthusiast'];
+async function roleLoop(){const el=$('#role-text');
+  if(REDUCED){el.textContent=ROLES[0];return;}
+  for(;;){for(const r of ROLES){
+    for(let i=0;i<=r.length;i++){el.textContent=r.slice(0,i);await sleep(48);}
+    await sleep(1500);
+    for(let i=r.length;i>=0;i--){el.textContent=r.slice(0,i);await sleep(20);}
+    await sleep(260);}}}
 
-                updateStats(userData, reposData);
-                renderProjects(reposData);
-                renderCharts(reposData);
+/* ---------- GitHub live data ---------- */
+let GH_CACHE=null;
+async function loadGH(){if(GH_CACHE)return GH_CACHE;
+  const u=await fetch('https://api.github.com/users/'+CFG.user);
+  if(!u.ok)throw new Error('HTTP '+u.status);
+  const user=await u.json();
+  const r=await fetch('https://api.github.com/users/'+CFG.user+'/repos?per_page=100&sort=updated');
+  const repos=await r.json();
+  if(!Array.isArray(repos))throw new Error('bad repos payload');
+  GH_CACHE={user,repos};return GH_CACHE;}
+const LANG_COLORS={C:'#555555','C++':'#f34b79',Rust:'#dea584',Python:'#3572A5',JavaScript:'#f1e05a',
+  TypeScript:'#3178c6',Shell:'#89e051',Makefile:'#427819',HTML:'#e34c26',CSS:'#563d7c',
+  Go:'#00ADD8',CMake:'#DA3434',Assembly:'#6E4C13',Vim:'#199f4b',Dockerfile:'#384d54'};
+const langColor=l=>LANG_COLORS[l]||'#8b949e';
+function timeAgo(iso){const d=Math.floor((Date.now()-new Date(iso))/864e5);
+  if(d<1)return 'сегодня';if(d<2)return 'вчера';
+  if(d<31)return d+' дн. назад';const m=Math.floor(d/30);return m+' мес. назад';}
+function animateCount(el,val){if(val==null){el.textContent='—';return;}
+  const t0=performance.now(),dur=1300;
+  (function f(t){const p=Math.min(1,(t-t0)/dur);
+    el.textContent=Math.round(val*(1-Math.pow(1-p,3)));
+    if(p<1)requestAnimationFrame(f);})(t0);}
+function renderStats({user,repos}){
+  const stars=repos.reduce((s,r)=>s+r.stargazers_count,0);
+  const langs={};repos.forEach(r=>{if(r.language)langs[r.language]=(langs[r.language]||0)+(r.size||1);});
+  animateCount($('#st-repos'),user.public_repos);
+  animateCount($('#st-followers'),user.followers);
+  animateCount($('#st-stars'),stars);
+  animateCount($('#st-langs'),Object.keys(langs).length);
+  const total=Object.values(langs).reduce((a,b)=>a+b,0)||1;
+  const sorted=Object.entries(langs).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  $('#langbar').innerHTML=sorted.map(([l,v])=>
+    `<i style="width:${(v/total*100).toFixed(1)}%;background:${langColor(l)}" title="${esc(l)}"></i>`).join('');
+  $('#lang-legend').innerHTML=sorted.map(([l,v])=>
+    `<span><span class="sw" style="background:${langColor(l)}"></span>${esc(l)} ${(v/total*100).toFixed(0)}%</span>`).join('')||'<span>—</span>';
+  const recent=[...repos].sort((a,b)=>new Date(b.pushed_at)-new Date(a.pushed_at)).slice(0,5);
+  $('#activity').innerHTML=recent.map(r=>
+    `<div class="activity-row"><span>→ <a href="${esc(r.html_url)}" target="_blank" rel="noopener" style="text-decoration:none">${esc(r.name)}</a></span><span class="ago">${timeAgo(r.pushed_at)}</span></div>`).join('');}
+function renderProjects(repos,demo){
+  const grid=$('#projects-grid');
+  const top=[...repos].sort((a,b)=>(b.stargazers_count-a.stargazers_count)||(new Date(b.pushed_at)-new Date(a.pushed_at))).slice(0,6);
+  if(!top.length){grid.innerHTML='<div class="t-out">Публичных репозиториев пока нет — но это временно 😏</div>';return;}
+  grid.innerHTML=top.map(r=>`
+    <a class="card reveal visible" href="${esc(r.html_url)}" target="_blank" rel="noopener">
+      ${demo?'<span class="demo-badge">DEMO</span>':''}
+      <div class="card-head"><span class="card-name">${esc(r.name)}</span><span class="card-stars">★ ${r.stargazers_count}  ⑂ ${r.forks_count}</span></div>
+      <p class="card-desc">${esc(r.description||'Без описания. Настоящий инженер комментирует код, а не README.')}</p>
+      <div class="card-meta">
+        <span><span class="lang-dot" style="background:${langColor(r.language)}"></span>${esc(r.language||'—')}</span>
+        <span class="upd">⟳ ${timeAgo(r.pushed_at)}</span>
+      </div>
+    </a>`).join('');}
+const DEMO_REPOS=[
+ {name:'kernel-module-lab',description:'[demo] Эксперименты с модулями ядра Linux',language:'C',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh},
+ {name:'esp32-firmware',description:'[demo] Прошивка и RTOS-эксперименты на ESP32',language:'C++',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh},
+ {name:'rust-embedded-playground',description:'[demo] Embedded Rust без паники (почти)',language:'Rust',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh}];
+async function initGitHub(){
+  try{const d=await loadGH();renderStats(d);renderProjects(d.repos,false);
+    $('#gh-note').textContent='// данные получены через GitHub API в реальном времени';}
+  catch(e){console.warn('GitHub API:',e);
+    $('#gh-note').textContent='// GitHub API недоступен (rate limit 60 req/час или оффлайн) — показан демо-режим';
+    ['st-repos','st-followers','st-stars','st-langs'].forEach(id=>$('#'+id).textContent='—');
+    $('#langbar').innerHTML='';$('#lang-legend').innerHTML='<span>оффлайн</span>';
+    $('#activity').innerHTML='<div class="activity-row"><span>→ подключение к api.github.com…</span><span class="ago">timeout</span></div>';
+    renderProjects(DEMO_REPOS,true);}}
 
-            } catch (error) {
-                console.error('GitHub API Error:', error);
-                document.getElementById('main-stats').innerHTML = '<p>Error loading GitHub stats. Please check username or API limits.</p>';
-            }
-        }
+/* ---------- interactive terminal ---------- */
+const TERM=$('#term-out'),TIN=$('#term-input');
+const P=(html,cls='t-out')=>{const d=document.createElement('div');d.className=cls;d.innerHTML=html;TERM.appendChild(d);TERM.scrollTop=TERM.scrollHeight;return d;};
+const FILES={
+ 'about.txt':'Я инженер-исследователь. Низкоуровневая разработка, системное программирование,\nдрайверы ядра Linux, прошивки ESP32. Железо + софт = ❤',
+ 'skills.sys':'MODULES LOADED: c.ko cpp.ko rust.ko linux_kernel.ko esp32.ko gdb.ko git.ko cicd.ko',
+ 'contact.ini':'[links]\ngithub=https://github.com/lixynhay\ntelegram=https://t.me/lixynhay\nemail=lixynhay@gmail.com',
+ '.secret':'Ты нашёл скрытый файл. Теперь ты официально один из нас. 🤝\nПопробуй Konami-код: ↑ ↑ ↓ ↓ ← → ← → B A'};
+const BANNER=String.raw`
+██╗     ██╗██╗  ██╗██╗   ██╗███╗   ██╗██╗  ██╗ █████╗ ██╗   ██╗
+██║     ██║╚██╗██╔╝╚██╗ ██╔╝████╗  ██║██║  ██║██╔══██╗╚██╗ ██╔╝
+██║     ██║ ╚███╔╝  ╚████╔╝ ██╔██╗ ██║███████║███████║ ╚████╔╝ 
+██║     ██║ ██╔██╗   ╚██╔╝  ██║╚██╗██║██╔══██║██╔══██║  ╚██╔╝  
+███████╗██║██╔╝ ██╗   ██║   ██║ ╚████║██║  ██║██║  ██║   ██║   
+╚══════╝╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   `;
+const NEOFETCH=String.raw`
+    ┌─────────────┐    lixynhay@core
+    │ ▓▓▓▓▓▓▓▓▓▓▓ │    ─────────────────────────
+    │ ▓  LIXY-OS ▓ │    OS:       LixOS rolling x86_64
+    │ ▓▓▓▓▓▓▓▓▓▓▓ │    Host:     Human v2.x (carbon-based)
+    └──┬───────┬──┘    Kernel:   6.9.42-lixy
+   ────┴───────┴────   Uptime:   с самого детства
+                        Shell:    lixy-term v${VERSION}
+                        Stack:    C / C++ / Rust / asm
+                        Coffee:   critical dependency`;
+const COMMANDS={
+ help(){P('Доступные команды:','t-accent');
+   [['help','эта справка'],['whoami','кто я такой'],['skills','стек технологий'],
+    ['projects','проекты с GitHub'],['stats','статистика GitHub'],['neofetch','инфа о системе'],
+    ['contact','связь'],['github / tg / mail','открыть ссылки'],['cv','скачать резюме'],
+    ['theme [dark|amber|light]','смена темы'],['matrix / scanlines / sound [on|off]','эффекты'],
+    ['ls / cat <файл>','файловая система'],['echo, date, uptime, banner, clear','утилиты'],
+    ['hack','взлом Пентагона'],['sudo','попробуй…'],['hint','подсказки']].forEach(([c,d])=>
+     P(`  <span class="t-accent">${c}</span>`.padEnd(40)+` <span class="t-out">— ${d}</span>`));},
+ whoami(){P('<span class="t-ok">LixynHay</span> — Systems Engineer &amp; Researcher');
+   P('uid=1000(lixynhay) gid=1000(engineers) groups=kernel,embedded,rust');},
+ skills(){P('Ядро Linux · C/C++ · Rust · ESP32/Arduino · GDB Debugging · Embedded Systems · Git · CI/CD','t-ok');},
+ async projects(){try{const d=await loadGH();
+     const top=[...d.repos].sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,8);
+     if(!top.length)return P('Публичных репозиториев пока нет.','t-out');
+     top.forEach(r=>P(`  <span class="t-accent">${esc(r.name)}</span>  ★${r.stargazers_count}  [${esc(r.language||'—')}]  ${esc(r.html_url)}`));
+   }catch(e){P('GitHub API недоступен (rate limit). Загляните в секцию «Проекты» ниже.','t-err');}},
+ async stats(){try{const d=await loadGH();
+     const stars=d.repos.reduce((s,r)=>s+r.stargazers_count,0);
+     P(`repos: <span class="t-ok">${d.user.public_repos}</span>   followers: <span class="t-ok">${d.user.followers}</span>   total stars: <span class="t-ok">${stars}</span>`);}
+   catch(e){P('GitHub API недоступен (rate limit).','t-err');}},
+ contact(){P('GitHub:  <span class="t-accent">https://github.com/lixynhay</span>');
+   P('Telegram: <span class="t-accent">https://t.me/lixynhay</span>');
+   P('Email: <span class="t-accent">lixynhay@gmail.com</span>');},
+ github(){open(CFG.gh,'_blank');P('Открываю GitHub…','t-ok');},
+ tg(){open(CFG.tg,'_blank');P('Открываю Telegram…','t-ok');},
+ mail(){location.href=CFG.mail;P('Открываю почтовый клиент…','t-ok');},
+ theme(a){const t=a[0];
+   if(t&&THEMES.includes(t)){applyTheme(t);P('Тема: '+t,'t-ok');}
+   else{cycleTheme();P('Тема переключена → '+document.documentElement.dataset.theme,'t-ok');}},
+ matrix(a){MATRIX.toggle(a[0]==='on'?true:a[0]==='off'?false:undefined);
+   P('matrix: '+(MATRIX.running?'on':'off'),'t-ok');},
+ scanlines(a){toggleScanlines(a[0]==='on'?true:a[0]==='off'?false:undefined);},
+ sound(a){toggleSound(a[0]==='on'?true:a[0]==='off'?false:undefined);},
+ neofetch(){P('<span class="term-pre">'+esc(NEOFETCH)+'</span>');},
+ banner(){P('<span class="term-pre">'+esc(BANNER)+'</span>');},
+ ls(){P(Object.keys(FILES).map(f=>f.startsWith('.')?'<span class="t-err">'+f+'</span>':'<span class="t-accent">'+f+'</span>').join('   '));},
+ cat(a){const f=a[0];
+   if(!f)return P('cat: укажите файл. Например: cat about.txt','t-err');
+   if(FILES[f])P('<span class="t-out">'+esc(FILES[f]).replace(/\n/g,'<br>')+'</span>');
+   else P('cat: '+esc(f)+': No such file or directory','t-err');},
+ echo(a){P(esc(a.join(' '))||'');},
+ date(){P(new Date().toString());},
+ uptime(){P('up '+fmtUp(performance.now()),'t-ok');},
+ clear(){TERM.innerHTML='';},
+ cv(){downloadCV();P('Резюме формируется… проверьте загрузки ⬇','t-ok');},
+ hint(){P('1) Ctrl+K — палитра команд.','t-accent');
+   P('2) В файловой системе есть скрытый файл. ls подскажет.','t-accent');
+   P('3) Старые добрые ↑ ↑ ↓ ↓ ← → ← → B A никто не отменял.','t-accent');},
+ version(){P('LixynHay OS v'+VERSION+' · build by Qwen · 0 dependencies, 0 frameworks','t-ok');},
+ sudo(a){if(a.join(' ')==='rm -rf /'){
+     P('[sudo] password for lixynhay: ********','t-out');
+     P('УДАЛЯЮ /boot…','t-err');P('УДАЛЯЮ /home/lixynhay/portfolio…','t-err');
+     document.body.classList.add('glitching');SFX.err();
+     setTimeout(()=>{document.body.classList.remove('glitching');
+       P('…','t-out');P('РЕЛАКС. Это симуляция. Файловая система цела. 😌','t-ok');SFX.ok();},1600);}
+   else P('lixynhay is not in the sudoers file. Об инциденте будет доложено. 🚨','t-err');},
+ async hack(){P('Инициализация BREACH-протокола…','t-accent');
+   const steps=['Обход файрвола','Подбор ключей AES-4096','Инъекция в mainframe','Скачивание mainframe.exe','Заметание следов'];
+   for(const s of steps){const line=P(s+' …','t-out');
+     for(let i=1;i<=10;i++){line.innerHTML=s+' ['+'<span class="t-ok">'+'█'.repeat(i)+'</span>'+'░'.repeat(10-i)+'] '+(i*10)+'%';
+       await sleep(90+Math.random()*120);}SFX.key();}
+   P('ДОСТУП РАЗРЕШЁН.','t-ok');await sleep(700);
+   P('…шучу. Это просто анимация. Никакого mainframe не существует. Наверное.','t-out');}};
+const HISTORY=[];let hIdx=-1;
+async function runLine(raw){const line=raw.trim();
+  P('<span class="t-prompt">lixynhay@lixy:~$</span> <span class="t-cmd">'+esc(line)+'</span>');
+  if(!line)return;
+  HISTORY.push(line);hIdx=HISTORY.length;
+  const [cmd,...args]=line.split(/\s+/);
+  const fn=COMMANDS[cmd.toLowerCase()];
+  if(fn){SFX.key();await fn(args);}
+  else{P('команда не найдена: '+esc(cmd)+'. Введите <span class="t-accent">help</span>.','t-err');SFX.err();}}
+TIN.addEventListener('keydown',async e=>{
+  if(e.key==='Enter'){const v=TIN.value;TIN.value='';await runLine(v);}
+  else if(e.key==='ArrowUp'){e.preventDefault();if(hIdx>0)hIdx--;TIN.value=HISTORY[hIdx]||'';}
+  else if(e.key==='ArrowDown'){e.preventDefault();if(hIdx<HISTORY.length)hIdx++;TIN.value=HISTORY[hIdx]||'';}
+  else if(e.key==='Tab'){e.preventDefault();
+    const cur=TIN.value;
+    const all=[...Object.keys(COMMANDS),'cat about.txt','cat skills.sys','cat contact.ini','cat .secret'];
+    const hit=all.find(c=>c.startsWith(cur)&&c!==cur);
+    if(hit){TIN.value=hit;SFX.key();}}
+  else SFX.key();});
+TERM.addEventListener('click',()=>TIN.focus());
 
-        function updateStats(user, repos) {
-            const totalStars = repos.reduce((acc, repo) => acc + repo.stargazers_count, 0);
-            
-            const stats = [
-                { val: user.public_repos, label: 'Repositories' },
-                { val: user.followers, label: 'Followers' },
-                { val: totalStars, label: 'Total Stars' },
-                { val: user.total_private_repos || 0, label: 'Private Repos' }
-            ];
+/* ---------- CV generator ---------- */
+function downloadCV(){
+  const cv=
+`════════════════════════════════════════════
+  LIXYNHAY — Systems Engineer & Researcher
+════════════════════════════════════════════
+GitHub:   https://github.com/lixynhay
+Telegram: https://t.me/lixynhay
+Email:    lixynhay@gmail.com
 
-            const container = document.getElementById('main-stats');
-            container.innerHTML = stats.map(s => `
-                <div class="stat-card">
-                    <div class="stat-number">${s.val}</div>
-                    <div class="stat-label">${s.label}</div>
-                </div>
-            `).join('');
-        }
+ПРОФИЛЬ
+Инженер-исследователь, увлечённый низкоуровневой
+разработкой и системным программированием. Фокус —
+надёжные и эффективные решения на стыке железа и софта.
 
-        function renderProjects(repos) {
-            const container = document.getElementById('projects-container');
-            const myRepos = repos.filter(r => !r.fork).sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 6);
+КОМПЕТЕНЦИИ
+• Linux Kernel — драйверы, модули, отладка
+• C / C++ — системное программирование
+• Rust — безопасная низкоуровневая разработка
+• ESP32 / Arduino — embedded, прошивки
+• GDB Debugging • Embedded Systems • Git • CI/CD
 
-            if (myRepos.length === 0) {
-                container.innerHTML = '<p>No public repositories found.</p>';
-                return;
-            }
+── Сгенерировано автоматически на lixynhay.github.io ──
+P.S. Полная версия CV — по запросу в Telegram.`;
+  const blob=new Blob([cv],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='CV_LixynHay.txt';a.click();URL.revokeObjectURL(a.href);
+  toast('CV_LixynHay.txt скачан ⬇');}
 
-            container.innerHTML = myRepos.map(repo => `
-                <div class="project-card">
-                    <div>
-                        <div class="project-header">
-                            <a href="${repo.html_url}" target="_blank" class="project-title">${repo.name}</a>
-                            <span style="font-size:1.2rem">📂</span>
-                        </div>
-                        <p class="project-desc">${repo.description || 'No description provided.'}</p>
-                    </div>
-                    <div class="project-meta">
-                        <div class="lang-badge">
-                            <span class="lang-dot" style="background:${getLangColor(repo.language)}"></span>
-                            ${repo.language || 'Code'}
-                        </div>
-                        <div>⭐ ${repo.stargazers_count}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
+/* ---------- command palette ---------- */
+const ACTIONS=[
+ {l:'→ Главная',h:'#home',f:()=>go('#home')},
+ {l:'→ Терминал',h:'#terminal',f:()=>go('#terminal')},
+ {l:'→ Обо мне',h:'#about',f:()=>go('#about')},
+ {l:'→ Статистика',h:'#stats',f:()=>go('#stats')},
+ {l:'→ Проекты',h:'#projects',f:()=>go('#projects')},
+ {l:'⬇ Скачать CV',h:'generate',f:downloadCV},
+ {l:'↗ GitHub',h:'open',f:()=>open(CFG.gh,'_blank')},
+ {l:'↗ Telegram',h:'open',f:()=>open(CFG.tg,'_blank')},
+ {l:'✉️ Написать Email',h:'open',f:()=>location.href=CFG.mail},
+ {l:'◐ Сменить тему',h:'cycle',f:cycleTheme},
+ {l:'▦ Matrix: вкл/выкл',h:'fx',f:()=>MATRIX.toggle()},
+ {l:'▤ Scanlines: вкл/выкл',h:'fx',f:()=>toggleScanlines()},
+ {l:'♪ Звук: вкл/выкл',h:'fx',f:()=>toggleSound()},
+ {l:'⌫ Очистить терминал',h:'cls',f:()=>{TERM.innerHTML='';go('#terminal');}},
+];
+const go=sel=>document.querySelector(sel)?.scrollIntoView({behavior:'smooth'});
+let palItems=[],palIdx=0;
+function renderPalette(q=''){const list=$('#palette-list');
+  palItems=ACTIONS.filter(a=>a.l.toLowerCase().includes(q.toLowerCase()));
+  palIdx=0;
+  list.innerHTML=palItems.length?palItems.map((a,i)=>
+    `<div class="palette-item${i===0?' sel':''}" data-i="${i}"><span>${esc(a.l)}</span><kbd>${esc(a.h)}</kbd></div>`).join('')
+    :'<div class="palette-empty">Ничего не найдено. Попробуйте «theme» или «matrix».</div>';
+  list.querySelectorAll('.palette-item').forEach(el=>{
+    el.addEventListener('mouseenter',()=>setPalSel(+el.dataset.i));
+    el.addEventListener('click',()=>execPal(+el.dataset.i));});}
+function setPalSel(i){palIdx=i;$$('#palette-list .palette-item').forEach((el,j)=>el.classList.toggle('sel',j===i));}
+function execPal(i){const a=palItems[i];if(!a)return;closePalette();a.f();}
+function openPalette(){$('#palette').hidden=false;$('#palette-input').value='';renderPalette();
+  requestAnimationFrame(()=>$('#palette-input').focus());}
+function closePalette(){$('#palette').hidden=true;}
+$('#palette-input').addEventListener('input',e=>renderPalette(e.target.value));
+$('#palette-input').addEventListener('keydown',e=>{
+  if(e.key==='Escape')closePalette();
+  else if(e.key==='ArrowDown'){e.preventDefault();setPalSel(Math.min(palIdx+1,palItems.length-1));}
+  else if(e.key==='ArrowUp'){e.preventDefault();setPalSel(Math.max(palIdx-1,0));}
+  else if(e.key==='Enter'){e.preventDefault();execPal(palIdx);}});
+$('#palette').addEventListener('click',e=>{if(e.target.id==='palette')closePalette();});
+$('#palette-btn').addEventListener('click',openPalette);
+$('#theme-btn').addEventListener('click',cycleTheme);
+$('#cv-btn').addEventListener('click',downloadCV);
 
-        function getLangColor(lang) {
-            const colors = {
-                'JavaScript': '#f1e05a', 'Python': '#3572A5', 'C': '#555555', 
-                'C++': '#f34b7d', 'HTML': '#e34c26', 'CSS': '#563d7c',
-                'Rust': '#dea584', 'Go': '#00ADD8', 'Shell': '#89e051'
-            };
-            return colors[lang] || '#cccccc';
-        }
+/* ---------- konami code ---------- */
+const KONAMI=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let kIdx=0;
+addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette();return;}
+  if(e.key===KONAMI[kIdx]){kIdx++;
+    if(kIdx===KONAMI.length){kIdx=0;
+      document.body.classList.add('godmode');
+      MATRIX.toggle(true);
+      toast('🎮 GOD MODE ACTIVATED');SFX.ok();
+      setTimeout(()=>document.body.classList.remove('godmode'),8000);}}
+  else kIdx=0;});
 
-        let langChartInstance = null;
-        let activityChartInstance = null;
+/* ---------- HUD: clock / uptime / fps / cpu ---------- */
+const T0=performance.now();
+function fmtUp(ms){const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;
+  return [h,m,ss].map(v=>String(v).padStart(2,'0')).join(':');}
+setInterval(()=>{
+  $('#clock').textContent=new Date().toLocaleTimeString('ru-RU',{hour12:false});
+  $('#uptime').textContent=fmtUp(performance.now()-T0);},1000);
+let cpu=4;setInterval(()=>{cpu=Math.max(2,Math.min(96,cpu+(Math.random()-.48)*7));
+  $('#cpu').textContent=Math.round(cpu)+'%';},1800);
+let frames=0,fLast=performance.now();
+function loop(t){frames++;
+  if(t-fLast>=1000){$('#fps').textContent=frames;frames=0;fLast=t;}
+  MATRIX.frame(t);requestAnimationFrame(loop);}
 
-        function renderCharts(repos) {
-            const langCounts = {};
-            repos.forEach(repo => {
-                if (repo.language) {
-                    langCounts[repo.language] = (langCounts[repo.language] || 0) + 1;
-                }
-            });
+/* ---------- scroll reveal & active nav ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}}),{threshold:.12});
+$$('.reveal').forEach(el=>io.observe(el));
+const navIO=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){$$('.nav-links a').forEach(a=>
+    a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));}}),{threshold:.35});
+['home','terminal','about','stats','projects'].forEach(id=>{const s=document.getElementById(id);if(s)navIO.observe(s);});
 
-            const monthCounts = new Array(12).fill(0);
-            const now = new Date();
-            repos.forEach(repo => {
-                const date = new Date(repo.updated_at);
-                const diffMonths = (now.getFullYear() - date.getFullYear()) * 12 + (now.getMonth() - date.getMonth());
-                if (diffMonths >= 0 && diffMonths < 12) {
-                    monthCounts[11 - diffMonths]++;
-                }
-            });
-
-            const ctxLang = document.getElementById('langChart').getContext('2d');
-            const ctxAct = document.getElementById('repoActivityChart').getContext('2d');
-
-            if (langChartInstance) langChartInstance.destroy();
-            if (activityChartInstance) activityChartInstance.destroy();
-
-            langChartInstance = new Chart(ctxLang, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(langCounts),
-                    datasets: [{
-                        data: Object.values(langCounts),
-                        backgroundColor: ['#3b82f6', '#8b5cf6', '#06b6d4', '#ec4899', '#f59e0b', '#10b981'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } },
-                        title: { display: true, text: 'Languages Distribution', color: getComputedStyle(document.body).getPropertyValue('--text-color') }
-                    }
-                }
-            });
-
-            activityChartInstance = new Chart(ctxAct, {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [{
-                        label: 'Repo Updates',
-                        data: monthCounts,
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        title: { display: true, text: 'Activity (Last 12 Months)', color: getComputedStyle(document.body).getPropertyValue('--text-color') }
-                    }
-                }
-            });
-        }
-
-        function generateCV() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.setFontSize(22);
-            doc.text("LixynHay - CV", 20, 20);
-            
-            doc.setFontSize(12);
-            doc.text("Systems Engineer & Researcher", 20, 30);
-            
-            doc.text("Skills: Linux Kernel, C/C++, ESP32, Debugging", 20, 50);
-            doc.text("Contact: github.com/LixynHay", 20, 60);
-            
-            doc.save("LixynHay_CV.pdf");
-        }
-
-        function initCanvas() {
-            const canvas = document.getElementById('canvas-bg');
-            const ctx = canvas.getContext('2d');
-            let width, height;
-            let particles = [];
-
-            function resize() {
-                width = canvas.width = window.innerWidth;
-                height = canvas.height = window.innerHeight;
-            }
-            window.addEventListener('resize', resize);
-            resize();
-
-            class Particle {
-                constructor() {
-                    this.x = Math.random() * width;
-                    this.y = Math.random() * height;
-                    this.vx = (Math.random() - 0.5) * 0.5;
-                    this.vy = (Math.random() - 0.5) * 0.5;
-                    this.size = Math.random() * 2 + 1;
-                }
-                update() {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    if (this.x < 0 || this.x > width) this.vx *= -1;
-                    if (this.y < 0 || this.y > height) this.vy *= -1;
-                }
-                draw() {
-                    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--primary');
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            for (let i = 0; i < 50; i++) particles.push(new Particle());
-
-            function animate() {
-                ctx.clearRect(0, 0, width, height);
-                particles.forEach(p => {
-                    p.update();
-                    p.draw();
-                });
-                requestAnimationFrame(animate);
-            }
-            animate();
-        }
-    </script>
+/* ---------- init ---------- */
+applyTheme(store.get('lixy_theme','dark'),true);
+applyScanlines();
+MATRIX.init();
+$('#year').textContent=new Date().getFullYear();
+P('LixynHay Terminal v'+VERSION+' — ядро загружено.','t-ok');
+P('Введите <span class="t-accent">help</span> для списка команд. <span class="t-out">Ctrl+K — палитра.</span>');
+requestAnimationFrame(loop);
+boot().then(()=>{heroTermLoop();roleLoop();});
+initGitHub();
+</script>
+<noscript><style>#boot{display:none}</style><p style="padding:20px;text-align:center">Включите JavaScript — этот сайт работает на чистой магии JS.</p></noscript>
 </body>
 </html>
