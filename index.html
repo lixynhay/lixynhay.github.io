@@ -3,15 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LixynHay | Systems Engineer & Researcher</title>
-<meta name="description" content="Портфолио LixynHay — системный инженер и исследователь. Ядро Linux, embedded, Rust, C/C++.">
+<title>LixynHay | Embedded Engineer & Bot Developer</title>
+<meta name="description" content="Портфолио LixynHay — Embedded-инженер и разработчик Telegram-ботов. Python, Kotlin, ESP32.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23060a0f'/><text x='50' y='68' font-size='58' text-anchor='middle' fill='%2300e5ff' font-family='monospace' font-weight='bold'>L</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;800&display=swap" rel="stylesheet">
 <style>
-/* ============================================================
-   LIXYNHAY OS v3.8 — themes & base
-   ============================================================ */
 :root, [data-theme="dark"]{
   --bg:#060a0f; --bg2:#0a1118; --panel:#0d1520; --border:#16222e;
   --text:#c9d7e0; --muted:#5c7285;
@@ -44,15 +41,14 @@ body{
 ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 a{color:var(--accent)}
 
-/* ---------- fx layers ---------- */
-#matrix{position:fixed;inset:0;z-index:0;opacity:.16;pointer-events:none}
+#glbg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block}
+#matrix{position:fixed;inset:0;z-index:0;opacity:.14;pointer-events:none}
 #scanlines{position:fixed;inset:0;z-index:60;pointer-events:none;display:none;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 1px,transparent 1px 3px);
   animation:flicker 4s infinite}
 body.scanlines-on #scanlines{display:block}
 @keyframes flicker{0%,100%{opacity:.55}50%{opacity:.4}}
 
-/* ---------- boot ---------- */
 #boot{position:fixed;inset:0;background:#000;color:#33ff66;z-index:200;
   padding:42px;font-size:14px;line-height:1.9;transition:opacity .5s;cursor:pointer}
 #boot.done{opacity:0;pointer-events:none}
@@ -61,7 +57,6 @@ body.scanlines-on #scanlines{display:block}
 #boot-fill{height:100%;width:0;background:#33ff66;box-shadow:0 0 14px #33ff66}
 #boot .skip{position:absolute;bottom:26px;left:42px;color:#1d8a44;font-size:12px}
 
-/* ---------- nav ---------- */
 .nav{position:fixed;top:0;left:0;right:0;z-index:50;
   background:var(--bg); background:color-mix(in srgb,var(--bg) 82%,transparent);
   backdrop-filter:blur(10px); border-bottom:1px solid var(--border)}
@@ -79,7 +74,6 @@ body.scanlines-on #scanlines{display:block}
 .icon-btn{cursor:pointer;font:inherit;color:var(--muted);transition:.2s}
 .icon-btn:hover{color:var(--accent);border-color:var(--accent)}
 
-/* ---------- layout ---------- */
 main{position:relative;z-index:1}
 section{max-width:1200px;margin:0 auto;padding:110px 20px 30px;scroll-margin-top:80px}
 .sec-title{font-size:clamp(22px,3.4vw,34px);font-weight:800;letter-spacing:1px}
@@ -88,7 +82,6 @@ section{max-width:1200px;margin:0 auto;padding:110px 20px 30px;scroll-margin-top
 .reveal{opacity:0;transform:translateY(26px);transition:opacity .6s,transform .6s}
 .reveal.visible{opacity:1;transform:none}
 
-/* ---------- hero ---------- */
 .hero{min-height:100vh;display:grid;place-items:center;padding:120px 20px 40px}
 .hero-grid{max-width:1200px;width:100%;display:grid;grid-template-columns:1.05fr 1fr;gap:44px;align-items:center}
 .kicker{color:var(--muted);font-size:13px;letter-spacing:3px;margin-bottom:14px}
@@ -111,8 +104,8 @@ h1.glitch:hover::after{opacity:.8;color:var(--err);animation:gl2 .3s infinite re
 .btn:hover{background:var(--accent);color:var(--bg);box-shadow:0 0 26px var(--glow)}
 .btn.ghost{border-color:var(--border);color:var(--text)}
 .btn.ghost:hover{border-color:var(--accent);color:var(--bg);background:var(--accent)}
+.btn.small{padding:8px 14px;font-size:12px}
 
-/* ---------- terminal windows ---------- */
 .term-window{background:var(--panel);border:1px solid var(--border);border-radius:10px;
   overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.45)}
 .term-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border)}
@@ -129,12 +122,22 @@ h1.glitch:hover::after{opacity:.8;color:var(--err);animation:gl2 .3s infinite re
 .t-accent{color:var(--accent)}
 .term-pre{white-space:pre;overflow-x:auto;font-size:11px;line-height:1.25;color:var(--accent)}
 
-/* ---------- interactive terminal ---------- */
 #term-out{max-height:430px;overflow-y:auto;padding:16px 18px;font-size:13.5px;line-height:1.8;cursor:text}
 #term-line{display:flex;gap:8px;padding:10px 18px 16px;border-top:1px dashed var(--border)}
 #term-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font:inherit;font-size:13.5px;caret-color:var(--accent)}
 
-/* ---------- about ---------- */
+.py-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)}
+#py-samples{font:inherit;font-size:12px;background:var(--bg2);color:var(--text);
+  border:1px solid var(--border);border-radius:6px;padding:7px 10px;outline:none;cursor:pointer}
+.py-status{margin-left:auto;font-size:12px;color:var(--muted)}
+.py-status.ok{color:var(--green)} .py-status.err{color:var(--err)} .py-status.load{color:var(--accent)}
+#py-code{display:block;width:100%;min-height:250px;background:var(--bg2);color:var(--text);
+  border:none;outline:none;padding:16px 18px;font:inherit;font-size:13.5px;line-height:1.7;resize:vertical;
+  tab-size:4}
+.py-out-label{padding:8px 18px 0;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;border-top:1px dashed var(--border)}
+#py-out{padding:10px 18px 18px;min-height:70px;max-height:280px;overflow:auto;font-size:13px;
+  line-height:1.7;color:var(--green);white-space:pre-wrap;word-break:break-word}
+
 .about-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:44px}
 .about-text{color:var(--muted);font-size:15px;line-height:2;margin-bottom:28px}
 .about-text b{color:var(--text)}
@@ -149,7 +152,6 @@ h1.glitch:hover::after{opacity:.8;color:var(--err);animation:gl2 .3s infinite re
 .focus-card h4{color:var(--accent);font-size:14px;margin-bottom:4px}
 .focus-card p{color:var(--muted);font-size:13px;line-height:1.6}
 
-/* ---------- stats ---------- */
 .stats-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:34px}
 .stat-card{border:1px solid var(--border);background:var(--panel);padding:24px 20px;border-radius:10px;
   position:relative;overflow:hidden;transition:.25s}
@@ -169,25 +171,29 @@ h1.glitch:hover::after{opacity:.8;color:var(--err);animation:gl2 .3s infinite re
   border-radius:6px;margin-bottom:8px;font-size:13px}
 .activity-row .ago{color:var(--muted);white-space:nowrap}
 
-/* ---------- projects ---------- */
 .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
 .card{display:flex;flex-direction:column;gap:10px;border:1px solid var(--border);background:var(--panel);
-  padding:22px;border-radius:12px;text-decoration:none;color:var(--text);transition:.25s;position:relative;overflow:hidden}
+  padding:22px;border-radius:12px;color:var(--text);transition:.25s;position:relative;overflow:hidden}
 .card::before{content:'';position:absolute;inset:0;transform:translateX(-110%);
   background:linear-gradient(120deg,transparent,rgba(255,255,255,.05),transparent);transition:transform .6s}
 .card:hover::before{transform:translateX(110%)}
 .card:hover{border-color:var(--accent);transform:translateY(-5px);box-shadow:0 14px 34px rgba(0,0,0,.4)}
-.card-head{display:flex;justify-content:space-between;gap:10px}
-.card-name{color:var(--accent);font-weight:600}
+.card-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.card-name{color:var(--accent);font-weight:600;text-decoration:none}
+.card-name:hover{text-decoration:underline}
 .card-stars{color:var(--muted);font-size:13px;white-space:nowrap}
 .card-desc{color:var(--muted);font-size:13px;line-height:1.7;flex:1}
-.card-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted)}
+.card-meta{display:flex;flex-wrap:wrap;align-items:center;gap:14px;font-size:12px;color:var(--muted)}
 .lang-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.card-actions{margin-left:auto;display:flex;gap:8px}
+.mini-btn{font:inherit;font-size:11px;color:var(--muted);background:transparent;
+  border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;
+  text-decoration:none;transition:.2s;display:inline-flex;align-items:center;gap:4px}
+.mini-btn:hover{color:var(--accent);border-color:var(--accent);box-shadow:0 0 12px var(--glow)}
 .demo-badge{position:absolute;top:12px;right:-26px;transform:rotate(38deg);background:var(--err);
   color:#fff;font-size:10px;letter-spacing:2px;padding:3px 30px}
 .more-row{margin-top:26px;text-align:center}
 
-/* ---------- footer ---------- */
 footer{border-top:1px solid var(--border);margin-top:80px;padding:44px 20px;text-align:center;
   color:var(--muted);font-size:13px;line-height:2.2;position:relative;z-index:1}
 .socials{display:flex;justify-content:center;gap:14px;margin-bottom:14px}
@@ -197,7 +203,6 @@ footer{border-top:1px solid var(--border);margin-top:80px;padding:44px 20px;text
 .hintline{font-size:11px;opacity:.6}
 kbd{border:1px solid var(--border);border-bottom-width:2px;border-radius:4px;padding:1px 6px;font-size:11px;background:var(--panel)}
 
-/* ---------- palette ---------- */
 #palette{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
   display:flex;justify-content:center;align-items:flex-start;padding-top:14vh}
 #palette[hidden]{display:none}
@@ -211,7 +216,6 @@ kbd{border:1px solid var(--border);border-bottom-width:2px;border-radius:4px;pad
 .palette-item.sel,.palette-item:hover{background:var(--bg2);color:var(--text);border-left:3px solid var(--accent)}
 .palette-empty{padding:18px;color:var(--muted);font-size:13px}
 
-/* ---------- toast / glitch / godmode ---------- */
 #toast{position:fixed;right:20px;bottom:20px;z-index:150;background:var(--panel);
   border:1px solid var(--accent);color:var(--text);padding:12px 20px;border-radius:8px;
   box-shadow:0 0 26px var(--glow);transform:translateY(180%);transition:transform .3s;font-size:13px}
@@ -221,7 +225,6 @@ body.glitching{animation:bodygl .1s infinite}
 body.godmode{animation:hue 1.6s linear infinite}
 @keyframes hue{to{filter:hue-rotate(360deg)}}
 
-/* ---------- responsive ---------- */
 @media (max-width:980px){
   .hero-grid,.about-grid{grid-template-columns:1fr}
   .stats-cards{grid-template-columns:repeat(2,1fr)}
@@ -239,23 +242,22 @@ body.godmode{animation:hue 1.6s linear infinite}
 </head>
 <body>
 
+<canvas id="glbg"></canvas>
 <canvas id="matrix"></canvas>
-<div id="scanlines"></div>
-
-<!-- BOOT -->
+<div id="sc
 <div id="boot">
   <div id="boot-log"></div>
   <div class="bar"><div id="boot-fill"></div></div>
   <div class="skip">[ нажмите любую клавишу или кликните, чтобы пропустить ]</div>
 </div>
 
-<!-- NAV -->
 <nav class="nav">
   <div class="nav-inner">
     <a class="logo" href="#home">LIXYNHAY://OS</a>
     <div class="nav-links">
       <a href="#home" class="active">Главная</a>
       <a href="#terminal">Терминал</a>
+      <a href="#python">Python</a>
       <a href="#about">Обо мне</a>
       <a href="#stats">Статистика</a>
       <a href="#projects">Проекты</a>
@@ -272,7 +274,6 @@ body.godmode{animation:hue 1.6s linear infinite}
 </nav>
 
 <main>
-  <!-- HERO -->
   <section class="hero" id="home">
     <div class="hero-grid">
       <div>
@@ -280,19 +281,19 @@ body.godmode{animation:hue 1.6s linear infinite}
         <h1 class="glitch" data-text="LIXYNHAY">LIXYNHAY</h1>
         <div class="tagline"><span id="role-text"></span><span class="cursor">█</span></div>
         <p class="hero-desc">
-          Инженер-исследователь. Увлечён низкоуровневой разработкой и системным
-          программированием. Мой фокус — создание надёжных и эффективных решений
-          на стыке железа и софта: от драйверов ядра Linux до прошивок ESP32.
+          Embedded-инженер и разработчик Telegram-ботов. Мой фокус — надёжные решения
+          на стыке железа и софта: от прошивок ESP32 до ботов на Python и Kotlin,
+          которые живут в продакшене.
         </p>
         <div class="btn-row">
           <button class="btn" id="cv-btn">⬇ Скачать CV</button>
           <a class="btn ghost" href="https://github.com/lixynhay" target="_blank" rel="noopener">GitHub ↗</a>
-          <a class="btn ghost" href="#terminal">▶ Терминал</a>
+          <a class="btn ghost" href="#python">🐍 Python Lab</a>
         </div>
         <div class="chips">
-          <span class="chip">🐧 Linux Kernel</span><span class="chip">C/C++</span>
-          <span class="chip">🦀 Rust</span><span class="chip">ESP32/Arduino</span>
-          <span class="chip">🐞 GDB</span><span class="chip">⚙️ CI/CD</span>
+          <span class="chip">🐍 Python</span><span class="chip">🧩 Kotlin</span>
+          <span class="chip">📟 ESP32/Arduino</span><span class="chip">🤖 Telegram Bot API</span>
+          <span class="chip">⚙️ Embedded</span><span class="chip">Git / CI-CD</span>
         </div>
       </div>
       <div class="term-window">
@@ -303,13 +304,12 @@ body.godmode{animation:hue 1.6s linear infinite}
     </div>
   </section>
 
-  <!-- TERMINAL -->
   <section id="terminal">
     <h2 class="sec-title reveal"><span class="num">01</span>ТЕРМИНАЛ</h2>
     <p class="sec-sub reveal">Полноценная командная строка. Введите <b>help</b> — и понеслось.</p>
     <div class="term-window reveal">
       <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-        <span class="term-title">lixy-term v3.8 — /dev/tty1</span></div>
+        <span class="term-title">lixy-term v3.9 — /dev/tty1</span></div>
       <div id="term-out" tabindex="0"></div>
       <div id="term-line">
         <span class="t-prompt">lixynhay@lixy:~$</span>
@@ -318,39 +318,54 @@ body.godmode{animation:hue 1.6s linear infinite}
     </div>
   </section>
 
-  <!-- ABOUT -->
+  <section id="python">
+    <h2 class="sec-title reveal"><span class="num">02</span>PYTHON LAB</h2>
+    <p class="sec-sub reveal">Настоящий интерпретатор Python прямо в браузере — Pyodide (WebAssembly). Без сервера, без установки.</p>
+    <div class="term-window reveal">
+      <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="term-title">python-lab — pyodide/wasm</span></div>
+      <div class="py-toolbar">
+        <select id="py-samples" title="Примеры"></select>
+        <button class="btn small" id="py-run">▶ Run <kbd>Ctrl+Enter</kbd></button>
+        <button class="btn small ghost" id="py-clear">Clear</button>
+        <span class="py-status" id="py-status">интерпретатор не загружен</span>
+      </div>
+      <textarea id="py-code" spellcheck="false" wrap="off"></textarea>
+      <div class="py-out-label">&gt;&gt;&gt; output</div>
+      <pre id="py-out"></pre>
+    </div>
+  </section>
+
   <section id="about">
-    <h2 class="sec-title reveal"><span class="num">02</span>ОБО МНЕ</h2>
+    <h2 class="sec-title reveal"><span class="num">03</span>ОБО МНЕ</h2>
     <p class="sec-sub reveal">cat /home/lixynhay/about.txt</p>
     <div class="about-grid">
       <div class="reveal">
         <p class="about-text">
-          Я инженер-исследователь, увлечённый <b>низкоуровневой разработкой</b> и
-          <b>системным программированием</b>. Мой фокус — создание надёжных и
-          эффективных решений на стыке железа и софта.<br><br>
-          От написания <b>драйверов ядра Linux</b> до прошивки микроконтроллеров
-          <b>ESP32</b> — мне интересно всё, где код встречается с кремнием.
-          Люблю разбираться, как вещи работают под капотом, и чинить то,
-          что другие считают несуществующим.
+          Я инженер, специализирующийся на <b>Embedded-разработке</b> и создании
+          <b>Telegram-ботов</b>. Мой фокус — надёжные и эффективные решения на стыке
+          железа и софта.<br><br>
+          От прошивки микроконтроллеров <b>ESP32</b> до ботов на <b>Python</b> и
+          <b>Kotlin</b> — мне интересно всё, где код встречается с реальным миром.
+          Люблю разбираться, как вещи работают под капотом, и автоматизировать всё,
+          что можно автоматизировать.
         </p>
         <div class="chips">
-          <span class="chip">Linux Kernel</span><span class="chip">C/C++</span><span class="chip">Rust</span>
-          <span class="chip">ESP32/Arduino</span><span class="chip">GDB Debugging</span>
+          <span class="chip">Python</span><span class="chip">Kotlin</span>
+          <span class="chip">ESP32/Arduino</span><span class="chip">Telegram Bot API</span>
           <span class="chip">Embedded Systems</span><span class="chip">Git</span><span class="chip">CI/CD</span>
         </div>
       </div>
       <div>
-        <div class="focus-card reveal"><span class="ico">🐧</span><div><h4>Ядро Linux</h4><p>Драйверы, модули, отладка через GDB, чтение исходников вместо новостей.</p></div></div>
-        <div class="focus-card reveal"><span class="ico">🦀</span><div><h4>Rust</h4><p>Безопасность памяти без сборщика мусора. Там, где C уже страшно, а Python ещё нельзя.</p></div></div>
-        <div class="focus-card reveal"><span class="ico">🔌</span><div><h4>Embedded</h4><p>ESP32, Arduino, регистры, прерывания, осциллограф и немного магии.</p></div></div>
-        <div class="focus-card reveal"><span class="ico">🔬</span><div><h4>Исследования</h4><p>Reverse engineering, бенчмарки, эксперименты. Если что-то можно сломать — я выясню как.</p></div></div>
+        <div class="focus-card reveal"><span class="ico">📟</span><div><h4>Embedded Engineering</h4><p>ESP32 и Arduino: прошивки, датчики, периферия, протоколы и борьба за каждый миллиампер.</p></div></div>
+        <div class="focus-card reveal"><span class="ico">🤖</span><div><h4>Telegram-боты</h4><p>Боты любой сложности: команды, inline-клавиатуры, интеграции, автоматизация и продакшен-надёжность.</p></div></div>
+        <div class="focus-card reveal"><span class="ico">🐍</span><div><h4>Python</h4><p>Основной инструмент: боты, скрипты, автоматизация, прототипы — всё, что должно работать быстро и надёжно.</p></div></div>
+        <div class="focus-card reveal"><span class="ico">🧩</span><div><h4>Kotlin</h4><p>Когда нужна строгая типизация, лаконичность и удовольствие от кода.</p></div></div>
       </div>
     </div>
   </section>
-
-  <!-- STATS -->
   <section id="stats">
-    <h2 class="sec-title reveal"><span class="num">03</span>GITHUB СТАТИСТИКА</h2>
+    <h2 class="sec-title reveal"><span class="num">04</span>GITHUB СТАТИСТИКА</h2>
     <p class="sec-sub reveal">curl -s api.github.com/users/lixynhay | jq '.stats'  ·  данные живые</p>
     <p class="gh-note" id="gh-note"></p>
     <div class="stats-cards">
@@ -368,10 +383,9 @@ body.godmode{animation:hue 1.6s linear infinite}
     </div>
   </section>
 
-  <!-- PROJECTS -->
   <section id="projects">
-    <h2 class="sec-title reveal"><span class="num">04</span>ПРОЕКТЫ</h2>
-    <p class="sec-sub reveal">git clone --depth=1 https://github.com/lixynhay/awesome</p>
+    <h2 class="sec-title reveal"><span class="num">05</span>ПРОЕКТЫ</h2>
+    <p class="sec-sub reveal">Ссылку на любой репозиторий можно скопировать кнопкой ⧉ — не открывая его</p>
     <div class="projects-grid" id="projects-grid">
       <div class="t-out">Загрузка проектов с GitHub…</div>
     </div>
@@ -387,11 +401,10 @@ body.godmode{animation:hue 1.6s linear infinite}
     <a href="https://t.me/lixynhay" target="_blank" rel="noopener">TG</a>
     <a href="mailto:lixynhay@gmail.com">✉️ EMAIL</a>
   </div>
-  © <span id="year"></span> LixynHay. Built with ⚡, Qwen и чистым HTML/CSS/JS — без единого фреймворка.<br>
+  © <span id="year"></span> LixynHay. Built with ⚡, Qwen, WebGL и Pyodide — ноль фреймворков.<br>
   <span class="hintline">Подсказка: <kbd>Ctrl</kbd>+<kbd>K</kbd> — палитра команд · терминал знает больше, чем кажется · а Konami-код всё ещё работает</span>
 </footer>
 
-<!-- COMMAND PALETTE -->
 <div id="palette" hidden>
   <div class="palette-box">
     <input id="palette-input" placeholder="Введите команду… (Esc — закрыть)">
@@ -403,23 +416,25 @@ body.godmode{animation:hue 1.6s linear infinite}
 
 <script>
 'use strict';
-/* ============================================================
-   LIXYNHAY OS — core
-   ============================================================ */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const VERSION='3.8.0-max';
+const VERSION='3.9.0';
 const CFG={gh:'https://github.com/lixynhay',tg:'https://t.me/lixynhay',mail:'mailto:lixynhay@gmail.com',user:'lixynhay'};
 const store={get:(k,d)=>localStorage.getItem(k)??d,set:(k,v)=>localStorage.setItem(k,v)};
 
-/* ---------- toast ---------- */
 let toastTimer;
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
 
-/* ---------- sound (Web Audio, no files) ---------- */
+async function copyText(t){
+  try{await navigator.clipboard.writeText(t);return true;}
+  catch(e){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    let ok=false;try{ok=document.execCommand('copy');}catch(_){}
+    ta.remove();return ok;}}
+
 const SFX={ctx:null,on:store.get('lixy_sound','0')==='1',
   init(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}},
   beep(f=520,d=.05,type='square',g=.02){if(!this.on)return;this.init();const c=this.ctx;if(!c)return;
@@ -430,9 +445,61 @@ const SFX={ctx:null,on:store.get('lixy_sound','0')==='1',
   ok(){this.beep(880,.09,'sine',.03)},
   err(){this.beep(130,.22,'sawtooth',.04)}};
 
-/* ---------- matrix rain ---------- */
-const MATRIX={cv:$('#matrix'),ctx:null,running:false,drops:[],last:0,
-  chars:'アイウエオカキクケコサシスセソタチツテトナニヌネノ01<>/{}[]#$%&*+=?',
+const GLBG={cv:document.getElementById('glbg'),gl:null,running:false,last:0,cols:null,
+  init(){
+    const gl=this.cv.getContext('webgl',{antialias:false,alpha:false,depth:false,stencil:false});
+    if(!gl)return false;
+    this.gl=gl;
+    const vs='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+    const fs=`precision mediump float;
+uniform float t;uniform vec2 r;uniform vec3 bg;uniform vec3 c1;uniform vec3 c2;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p*=2.03;a*=.5;}return v;}
+void main(){
+ vec2 uv=gl_FragCoord.xy/r;
+ vec2 p=(gl_FragCoord.xy-.5*r)/r.y;
+ float q=fbm(p*3.+t*.12);
+ float waves=sin(p.x*7.+t*.8+q*5.)*.5+.5;
+ float glow=smoothstep(.35,.75,q);
+ vec3 col=mix(bg,c1,glow*.55);
+ col+=c2*pow(waves,3.)*.22*(.4+q);
+ col*=1.-dot(uv-.5,uv-.5)*1.1;
+ gl_FragColor=vec4(col,1.);}`;
+    const mk=(type,src)=>{const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+      if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){console.warn(gl.getShaderInfoLog(s));return null;}return s;};
+    const v=mk(gl.VERTEX_SHADER,vs),f=mk(gl.FRAGMENT_SHADER,fs);
+    if(!v||!f)return false;
+    const pr=gl.createProgram();gl.attachShader(pr,v);gl.attachShader(pr,f);gl.linkProgram(pr);
+    if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return false;
+    gl.useProgram(pr);
+    const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+    const loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    this.uT=gl.getUniformLocation(pr,'t');this.uR=gl.getUniformLocation(pr,'r');
+    this.uBg=gl.getUniformLocation(pr,'bg');this.uC1=gl.getUniformLocation(pr,'c1');this.uC2=gl.getUniformLocation(pr,'c2');
+    addEventListener('resize',()=>this.resize());this.resize();this.recolor();
+    return true;},
+  resize(){if(!this.gl)return;
+    this.cv.width=Math.max(2,innerWidth>>1);this.cv.height=Math.max(2,innerHeight>>1);
+    this.gl.viewport(0,0,this.cv.width,this.cv.height);},
+  recolor(){if(!this.gl)return;
+    const cs=getComputedStyle(document.documentElement);
+    const hx=k=>{const m=/^#?([0-9a-f]{6})$/i.exec(cs.getPropertyValue(k).trim());
+      return m?[parseInt(m[1].slice(0,2),16)/255,parseInt(m[1].slice(2,4),16)/255,parseInt(m[1].slice(4,6),16)/255]:[0,0,0];};
+    this.cols={bg:hx('--bg'),c1:hx('--accent'),c2:hx('--accent2')};},
+  frame(t){if(!this.running||!this.gl||t-this.last<33)return;this.last=t;
+    const gl=this.gl;
+    gl.uniform1f(this.uT,t/1000);gl.uniform2f(this.uR,this.cv.width,this.cv.height);
+    gl.uniform3fv(this.uBg,this.cols.bg);gl.uniform3fv(this.uC1,this.cols.c1);gl.uniform3fv(this.uC2,this.cols.c2);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);},
+  toggle(v){this.running=v??!this.running;store.set('lixy_gl',this.running?'1':'0');
+    this.cv.style.display=this.running?'block':'none';}};
+
+const MATRIX={cv:document.getElementById('matrix'),ctx:null,running:false,drops:[],last:0,
+  chars:'アイウエオカキクケコサシスセソタチツテト01<>/{}[]#$%&*+=?',
   init(){this.ctx=this.cv.getContext('2d');
     addEventListener('resize',()=>this.resize());
     this.running=store.get('lixy_matrix','1')==='1'&&!REDUCED;
@@ -440,7 +507,6 @@ const MATRIX={cv:$('#matrix'),ctx:null,running:false,drops:[],last:0,
   resize(){this.cv.width=innerWidth;this.cv.height=innerHeight;
     const cols=Math.floor(innerWidth/16);
     this.drops=Array.from({length:cols},()=>Math.random()*-60);},
-  recolor(){},
   start(){this.resize();this.cv.style.display='block';},
   stop(){this.cv.style.display='none';},
   toggle(v){this.running=v??!this.running;store.set('lixy_matrix',this.running?'1':'0');
@@ -456,35 +522,32 @@ const MATRIX={cv:$('#matrix'),ctx:null,running:false,drops:[],last:0,
       if(this.drops[i]*16>this.cv.height&&Math.random()>.975)this.drops[i]=0;
       this.drops[i]++;}}};
 
-/* ---------- theme ---------- */
 const THEMES=['dark','amber','light'];
 function applyTheme(t,quiet){document.documentElement.dataset.theme=t;store.set('lixy_theme',t);
-  $('#theme-label').textContent=t.toUpperCase();if(!quiet)toast('Тема: '+t.toUpperCase());}
+  $('#theme-label').textContent=t.toUpperCase();GLBG.recolor();
+  if(!quiet)toast('Тема: '+t.toUpperCase());}
 function cycleTheme(){const i=THEMES.indexOf(document.documentElement.dataset.theme);
   applyTheme(THEMES[(i+1)%THEMES.length]);}
-
-/* ---------- scanlines / sound toggles ---------- */
 function applyScanlines(){document.body.classList.toggle('scanlines-on',store.get('lixy_scan','0')==='1');}
 function toggleScanlines(v){const nv=v??!(store.get('lixy_scan','0')==='1');
   store.set('lixy_scan',nv?'1':'0');applyScanlines();toast('Scanlines: '+(nv?'ON':'OFF'));}
 function toggleSound(v){SFX.on=v??!SFX.on;store.set('lixy_sound',SFX.on?'1':'0');
   toast('Звук: '+(SFX.on?'ON':'OFF'));if(SFX.on)SFX.ok();}
 
-/* ---------- boot sequence ---------- */
 const BOOT_LINES=[
-'LIXY-BIOS v3.8.4 — QWEN CORE INIT',
+'LIXY-BIOS v3.9 — QWEN CORE INIT',
 'CPU0: LixynHay Neural Engine @ 4.20GHz ............ OK',
 'Memory Test: 65536 MB ............................. OK',
 'Detecting drives: /dev/portfolio .................. OK',
-'Loading modules: [skills] [projects] [github] ..... OK',
-'Starting services: github-api nginx coffee-daemon . OK',
-'Applying theme: '+store.get('lixy_theme','dark')+' .............................. OK',
+'Loading modules: [python] [kotlin] [esp32] [bots] . OK',
+'Starting services: github-api bot-daemon coffee ... OK',
+'Initializing WebGL shader pipeline ................ OK',
 'Mounting interface /dev/ui0 ....................... OK',
 '',
 '>> BOOTING LIXYNHAY OS…'];
-async function boot(){const ov=$('#boot');
+async function boot(){const ov=document.getElementById('boot');
   if(REDUCED){ov.remove();return;}
-  const log=$('#boot-log'),fill=$('#boot-fill');let skipped=false;
+  const log=document.getElementById('boot-log'),fill=document.getElementById('boot-fill');let skipped=false;
   const finish=()=>{if(skipped)return;skipped=true;ov.classList.add('done');setTimeout(()=>ov.remove(),520);};
   ov.addEventListener('click',finish);
   addEventListener('keydown',function sk(){finish();removeEventListener('keydown',sk);});
@@ -495,12 +558,11 @@ async function boot(){const ov=$('#boot');
     await sleep(80+Math.random()*130);}
   await sleep(350);finish();}
 
-/* ---------- hero: auto terminal + role typing ---------- */
 const HERO_SCRIPT=[
-  ['whoami','lixynhay — systems engineer & researcher'],
+  ['whoami','lixynhay — embedded engineer & telegram bot developer'],
   ['uname -a','LixOS 6.9.42-lixy x86_64 GNU/Linux'],
-  ['./init --mission','[ kernel ]  [ embedded ]  [ rust ]  [ research ]'],
-  ['echo $FOCUS','low-level engineering: от драйверов ядра до прошивок ESP32'],
+  ['./init --mission','[ embedded ]  [ telegram bots ]  [ python ]  [ kotlin ]'],
+  ['echo $STACK','Python + Kotlin + ESP32. Железо и боты живут дружно.'],
 ];
 async function typeInto(el,text,speed=28){for(const ch of text){el.textContent+=ch;await sleep(speed);}}
 async function heroTermLoop(){const out=$('#hero-term');
@@ -516,7 +578,7 @@ async function heroTermLoop(){const out=$('#hero-term');
       const o=document.createElement('div');o.className='t-out';out.appendChild(o);
       await typeInto(o,res,16);await sleep(950);}
     await sleep(2600);}}
-const ROLES=['Systems Engineer & Researcher','Linux Kernel Hacker','Embedded Developer','Rustacean','Low-Level Enthusiast'];
+const ROLES=['Embedded Engineer','Telegram Bot Developer','Python Developer','Kotlin Developer','Hardware Whisperer'];
 async function roleLoop(){const el=$('#role-text');
   if(REDUCED){el.textContent=ROLES[0];return;}
   for(;;){for(const r of ROLES){
@@ -525,7 +587,6 @@ async function roleLoop(){const el=$('#role-text');
     for(let i=r.length;i>=0;i--){el.textContent=r.slice(0,i);await sleep(20);}
     await sleep(260);}}}
 
-/* ---------- GitHub live data ---------- */
 let GH_CACHE=null;
 async function loadGH(){if(GH_CACHE)return GH_CACHE;
   const u=await fetch('https://api.github.com/users/'+CFG.user);
@@ -535,9 +596,10 @@ async function loadGH(){if(GH_CACHE)return GH_CACHE;
   const repos=await r.json();
   if(!Array.isArray(repos))throw new Error('bad repos payload');
   GH_CACHE={user,repos};return GH_CACHE;}
-const LANG_COLORS={C:'#555555','C++':'#f34b79',Rust:'#dea584',Python:'#3572A5',JavaScript:'#f1e05a',
-  TypeScript:'#3178c6',Shell:'#89e051',Makefile:'#427819',HTML:'#e34c26',CSS:'#563d7c',
-  Go:'#00ADD8',CMake:'#DA3434',Assembly:'#6E4C13',Vim:'#199f4b',Dockerfile:'#384d54'};
+const LANG_COLORS={C:'#555555','C++':'#f34b79',Python:'#3572A5',Kotlin:'#A97BFF',
+  JavaScript:'#f1e05a',TypeScript:'#3178c6',Shell:'#89e051',Makefile:'#427819',
+  HTML:'#e34c26',CSS:'#563d7c',Go:'#00ADD8',CMake:'#DA3434',Assembly:'#6E4C13',
+  Rust:'#dea584',Dockerfile:'#384d54'};
 const langColor=l=>LANG_COLORS[l]||'#8b949e';
 function timeAgo(iso){const d=Math.floor((Date.now()-new Date(iso))/864e5);
   if(d<1)return 'сегодня';if(d<2)return 'вчера';
@@ -568,19 +630,26 @@ function renderProjects(repos,demo){
   const top=[...repos].sort((a,b)=>(b.stargazers_count-a.stargazers_count)||(new Date(b.pushed_at)-new Date(a.pushed_at))).slice(0,6);
   if(!top.length){grid.innerHTML='<div class="t-out">Публичных репозиториев пока нет — но это временно 😏</div>';return;}
   grid.innerHTML=top.map(r=>`
-    <a class="card reveal visible" href="${esc(r.html_url)}" target="_blank" rel="noopener">
+    <div class="card reveal visible">
       ${demo?'<span class="demo-badge">DEMO</span>':''}
-      <div class="card-head"><span class="card-name">${esc(r.name)}</span><span class="card-stars">★ ${r.stargazers_count}  ⑂ ${r.forks_count}</span></div>
+      <div class="card-head">
+        <a class="card-name" href="${esc(r.html_url)}" target="_blank" rel="noopener">${esc(r.name)}</a>
+        <span class="card-stars">★ ${r.stargazers_count}  ⑂ ${r.forks_count}</span>
+      </div>
       <p class="card-desc">${esc(r.description||'Без описания. Настоящий инженер комментирует код, а не README.')}</p>
       <div class="card-meta">
         <span><span class="lang-dot" style="background:${langColor(r.language)}"></span>${esc(r.language||'—')}</span>
         <span class="upd">⟳ ${timeAgo(r.pushed_at)}</span>
+        <span class="card-actions">
+          <button class="mini-btn copy-btn" data-url="${esc(r.html_url)}" title="Скопировать ссылку на репозиторий">⧉ copy</button>
+          <a class="mini-btn" href="${esc(r.html_url)}" target="_blank" rel="noopener">открыть ↗</a>
+        </span>
       </div>
-    </a>`).join('');}
+    </div>`).join('');}
 const DEMO_REPOS=[
- {name:'kernel-module-lab',description:'[demo] Эксперименты с модулями ядра Linux',language:'C',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh},
- {name:'esp32-firmware',description:'[demo] Прошивка и RTOS-эксперименты на ESP32',language:'C++',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh},
- {name:'rust-embedded-playground',description:'[demo] Embedded Rust без паники (почти)',language:'Rust',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh}];
+ {name:'esp32-firmware',description:'[demo] Прошивки и эксперименты на ESP32',language:'C++',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh},
+ {name:'telegram-bot-kit',description:'[demo] Заготовки и утилиты для Telegram-ботов',language:'Python',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh},
+ {name:'kotlin-playground',description:'[demo] Kotlin-эксперименты и инструменты',language:'Kotlin',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh}];
 async function initGitHub(){
   try{const d=await loadGH();renderStats(d);renderProjects(d.repos,false);
     $('#gh-note').textContent='// данные получены через GitHub API в реальном времени';}
@@ -590,13 +659,122 @@ async function initGitHub(){
     $('#langbar').innerHTML='';$('#lang-legend').innerHTML='<span>оффлайн</span>';
     $('#activity').innerHTML='<div class="activity-row"><span>→ подключение к api.github.com…</span><span class="ago">timeout</span></div>';
     renderProjects(DEMO_REPOS,true);}}
+$('#projects-grid').addEventListener('click',async e=>{
+  const b=e.target.closest('.copy-btn');if(!b)return;
+  e.preventDefault();e.stopPropagation();
+  const ok=await copyText(b.dataset.url);
+  if(ok){toast('Ссылка скопирована ⧉');SFX.ok();
+    const old=b.textContent;b.textContent='✓ copied';
+    setTimeout(()=>b.textContent=old,1300);}
+  else{toast('Не удалось скопировать');SFX.err();}});
 
-/* ---------- interactive terminal ---------- */
+const SAMPLES={
+'Старт: fib + GPIO':`# Python Lab — код выполняется прямо в браузере (Pyodide/WASM)
+# Ctrl+Enter — запуск
+
+def fib(n):
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a
+
+print("Fibonacci(30) =", fib(30))
+
+# немного embedded-магии: манипуляция "регистром"
+GPIO_PORT = 0b0000_0000
+GPIO_PORT |= (1 << 2)    # поднять пин 2
+GPIO_PORT &= ~(1 << 0)   # опустить пин 0
+print(f"GPIO: {GPIO_PORT:08b}")`,
+'Telegram-бот (симуляция)':`# Симуляция обработчиков Telegram-бота (без сети)
+users = {}
+
+def start(update):
+    uid = update["from"]["id"]
+    users[uid] = {"name": update["from"]["first_name"], "msgs": 0}
+    return f"Привет, {users[uid]['name']}! Я бот."
+
+def message(update):
+    uid = update["from"]["id"]
+    users[uid]["msgs"] += 1
+    return f"Сообщение #{users[uid]['msgs']} принято."
+
+updates = [
+    {"from": {"id": 1, "first_name": "Lixyn"}},
+    {"from": {"id": 1}, "text": "hello"},
+    {"from": {"id": 1}, "text": "world"},
+]
+
+print(start(updates[0]))
+for u in updates[1:]:
+    print(message(u))
+print("База юзеров:", users)`,
+'Таймер-декоратор + решето':`import time
+
+def timer(fn):
+    def wrap(*a, **k):
+        t0 = time.perf_counter()
+        r = fn(*a, **k)
+        print(f"{fn.__name__}: {(time.perf_counter()-t0)*1000:.3f} ms")
+        return r
+    return wrap
+
+@timer
+def sieve(n):
+    flags = [True] * (n + 1)
+    for i in range(2, int(n ** 0.5) + 1):
+        if flags[i]:
+            for j in range(i * i, n + 1, i):
+                flags[j] = False
+    return sum(flags[2:])
+
+print("Простых до 100000:", sieve(100_000))`};
+const PY={ready:false,loading:null};
+function pyStatus(text,cls){const el=$('#py-status');el.textContent=text;el.className='py-status '+(cls||'');}
+function loadScript(src){return new Promise((res,rej)=>{
+  const s=document.createElement('script');s.src=src;s.onload=res;
+  s.onerror=()=>rej(new Error('не удалось загрузить '+src));document.body.appendChild(s);});}
+async function ensurePy(){
+  if(PY.ready)return window._py;
+  if(!PY.loading){PY.loading=(async()=>{
+    pyStatus('загружаю Pyodide (~10 МБ)…','load');
+    if(!window.loadPyodide)await loadScript('https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js');
+    const py=await window.loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/'});
+    window._py=py;PY.ready=true;pyStatus('интерпретатор готов ✓','ok');SFX.ok();
+    return py;
+  })().catch(e=>{PY.loading=null;pyStatus('ошибка: '+e.message,'err');throw e;});}
+  return PY.loading;}
+async function runPy(){
+  const code=$('#py-code').value,out=$('#py-out');
+  out.textContent='';
+  let py;try{py=await ensurePy();}catch(e){out.textContent='⚠ '+e.message+'\n(нужен доступ к CDN jsdelivr)';return;}
+  pyStatus('выполняю…','load');
+  let buf='';
+  try{
+    py.setStdout({batched:s=>buf+=s+'\n'});
+    py.setStderr({batched:s=>buf+='[stderr] '+s+'\n'});
+    await py.runPythonAsync(code);
+  }catch(e){buf+='[exception]\n'+e.message+'\n';}
+  out.textContent=buf||'(пусто — добавьте print())';
+  pyStatus('интерпретатор готов ✓','ok');}
+function initPythonLab(){
+  const sel=$('#py-samples'),code=$('#py-code');
+  const keys=Object.keys(SAMPLES);
+  sel.innerHTML=keys.map(k=>`<option>${esc(k)}</option>`).join('');
+  code.value=SAMPLES[keys[0]];
+  sel.addEventListener('change',()=>{code.value=SAMPLES[sel.value];$('#py-out').textContent='';});
+  $('#py-run').addEventListener('click',runPy);
+  $('#py-clear').addEventListener('click',()=>{code.value='';$('#py-out').textContent='';code.focus();});
+  code.addEventListener('keydown',e=>{
+    if(e.key==='Tab'){e.preventDefault();
+      const s=code.selectionStart,ep=code.selectionEnd;
+      code.value=code.value.slice(0,s)+'    '+code.value.slice(ep);
+      code.selectionStart=code.selectionEnd=s+4;}
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();r
 const TERM=$('#term-out'),TIN=$('#term-input');
 const P=(html,cls='t-out')=>{const d=document.createElement('div');d.className=cls;d.innerHTML=html;TERM.appendChild(d);TERM.scrollTop=TERM.scrollHeight;return d;};
 const FILES={
- 'about.txt':'Я инженер-исследователь. Низкоуровневая разработка, системное программирование,\nдрайверы ядра Linux, прошивки ESP32. Железо + софт = ❤',
- 'skills.sys':'MODULES LOADED: c.ko cpp.ko rust.ko linux_kernel.ko esp32.ko gdb.ko git.ko cicd.ko',
+ 'about.txt':'Embedded-инженер и разработчик Telegram-ботов.\nPython + Kotlin + ESP32. Железо, боты, автоматизация.',
+ 'skills.sys':'MODULES LOADED: python.ko kotlin.ko esp32.ko telegram_bot_api.ko embedded.ko git.ko cicd.ko',
  'contact.ini':'[links]\ngithub=https://github.com/lixynhay\ntelegram=https://t.me/lixynhay\nemail=lixynhay@gmail.com',
  '.secret':'Ты нашёл скрытый файл. Теперь ты официально один из нас. 🤝\nПопробуй Konami-код: ↑ ↑ ↓ ↓ ← → ← → B A'};
 const BANNER=String.raw`
@@ -614,29 +792,44 @@ const NEOFETCH=String.raw`
     └──┬───────┬──┘    Kernel:   6.9.42-lixy
    ────┴───────┴────   Uptime:   с самого детства
                         Shell:    lixy-term v${VERSION}
-                        Stack:    C / C++ / Rust / asm
-                        Coffee:   critical dependency`;
+                        Stack:    Python / Kotlin / ESP32`;
 const COMMANDS={
  help(){P('Доступные команды:','t-accent');
    [['help','эта справка'],['whoami','кто я такой'],['skills','стек технологий'],
-    ['projects','проекты с GitHub'],['stats','статистика GitHub'],['neofetch','инфа о системе'],
-    ['contact','связь'],['github / tg / mail','открыть ссылки'],['cv','скачать резюме'],
-    ['theme [dark|amber|light]','смена темы'],['matrix / scanlines / sound [on|off]','эффекты'],
+    ['projects','проекты с GitHub'],['copy <репо>','скопировать ссылку на репозиторий'],
+    ['stats','статистика GitHub'],['python','открыть Python Lab'],
+    ['neofetch','инфа о системе'],['contact','связь'],
+    ['github / tg / mail','открыть ссылки'],['cv','скачать резюме'],
+    ['theme [dark|amber|light]','смена темы'],
+    ['shader / matrix / scanlines / sound [on|off]','эффекты'],
     ['ls / cat <файл>','файловая система'],['echo, date, uptime, banner, clear','утилиты'],
     ['hack','взлом Пентагона'],['sudo','попробуй…'],['hint','подсказки']].forEach(([c,d])=>
-     P(`  <span class="t-accent">${c}</span>`.padEnd(40)+` <span class="t-out">— ${d}</span>`));},
- whoami(){P('<span class="t-ok">LixynHay</span> — Systems Engineer &amp; Researcher');
-   P('uid=1000(lixynhay) gid=1000(engineers) groups=kernel,embedded,rust');},
- skills(){P('Ядро Linux · C/C++ · Rust · ESP32/Arduino · GDB Debugging · Embedded Systems · Git · CI/CD','t-ok');},
+     P(`  <span class="t-accent">${c}</span>`.padEnd(44)+` <span class="t-out">— ${d}</span>`));},
+ whoami(){P('<span class="t-ok">LixynHay</span> — Embedded Engineer &amp; Telegram Bot Developer');
+   P('uid=1000(lixynhay) gid=1000(engineers) groups=embedded,bots,python,kotlin');},
+ skills(){P('Python · Kotlin · ESP32/Arduino · Telegram Bot API · Embedded Systems · Git · CI/CD','t-ok');},
  async projects(){try{const d=await loadGH();
      const top=[...d.repos].sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,8);
      if(!top.length)return P('Публичных репозиториев пока нет.','t-out');
-     top.forEach(r=>P(`  <span class="t-accent">${esc(r.name)}</span>  ★${r.stargazers_count}  [${esc(r.language||'—')}]  ${esc(r.html_url)}`));
+     top.forEach(r=>P(`  <span class="t-accent">${esc(r.name)}</span>  ★${r.stargazers_count}  [${esc(r.language||'—')}]  <span class="t-out">${esc(r.html_url)}</span>`));
+     P('Скопировать ссылку: <span class="t-accent">copy &lt;имя-репо&gt;</span>');
    }catch(e){P('GitHub API недоступен (rate limit). Загляните в секцию «Проекты» ниже.','t-err');}},
+ async copy(a){const name=a.join(' ').toLowerCase();
+   if(!name){P('Использование: <span class="t-accent">copy &lt;имя-репозитория&gt;</span>. Список: projects','t-out');return;}
+   try{const d=await loadGH();
+     const r=d.repos.find(x=>x.name.toLowerCase()===name)||d.repos.find(x=>x.name.toLowerCase().includes(name));
+     if(!r)return P('Репозиторий не найден: '+esc(name),'t-err');
+     const ok=await copyText(r.html_url);
+     if(ok){P('Скопировано в буфер: '+esc(r.html_url),'t-ok');toast('Ссылка скопирована ⧉');}
+     else P('Буфер обмена недоступен.','t-err');
+   }catch(e){P('GitHub API недоступен.','t-err');}},
  async stats(){try{const d=await loadGH();
      const stars=d.repos.reduce((s,r)=>s+r.stargazers_count,0);
      P(`repos: <span class="t-ok">${d.user.public_repos}</span>   followers: <span class="t-ok">${d.user.followers}</span>   total stars: <span class="t-ok">${stars}</span>`);}
    catch(e){P('GitHub API недоступен (rate limit).','t-err');}},
+ python(){document.querySelector('#python').scrollIntoView({behavior:'smooth'});
+   setTimeout(()=>$('#py-code').focus({preventScroll:true}),600);
+   P('Python Lab открыт. Ctrl+Enter — запуск.','t-ok');},
  contact(){P('GitHub:  <span class="t-accent">https://github.com/lixynhay</span>');
    P('Telegram: <span class="t-accent">https://t.me/lixynhay</span>');
    P('Email: <span class="t-accent">lixynhay@gmail.com</span>');},
@@ -646,6 +839,8 @@ const COMMANDS={
  theme(a){const t=a[0];
    if(t&&THEMES.includes(t)){applyTheme(t);P('Тема: '+t,'t-ok');}
    else{cycleTheme();P('Тема переключена → '+document.documentElement.dataset.theme,'t-ok');}},
+ shader(a){GLBG.toggle(a[0]==='on'?true:a[0]==='off'?false:undefined);
+   toast('Shader: '+(GLBG.running?'ON':'OFF'));P('shader: '+(GLBG.running?'on':'off'),'t-ok');},
  matrix(a){MATRIX.toggle(a[0]==='on'?true:a[0]==='off'?false:undefined);
    P('matrix: '+(MATRIX.running?'on':'off'),'t-ok');},
  scanlines(a){toggleScanlines(a[0]==='on'?true:a[0]==='off'?false:undefined);},
@@ -665,7 +860,7 @@ const COMMANDS={
  hint(){P('1) Ctrl+K — палитра команд.','t-accent');
    P('2) В файловой системе есть скрытый файл. ls подскажет.','t-accent');
    P('3) Старые добрые ↑ ↑ ↓ ↓ ← → ← → B A никто не отменял.','t-accent');},
- version(){P('LixynHay OS v'+VERSION+' · build by Qwen · 0 dependencies, 0 frameworks','t-ok');},
+ version(){P('LixynHay OS v'+VERSION+' · build by Qwen · WebGL + Pyodide inside','t-ok');},
  sudo(a){if(a.join(' ')==='rm -rf /'){
      P('[sudo] password for lixynhay: ********','t-out');
      P('УДАЛЯЮ /boot…','t-err');P('УДАЛЯЮ /home/lixynhay/portfolio…','t-err');
@@ -701,27 +896,26 @@ TIN.addEventListener('keydown',async e=>{
   else SFX.key();});
 TERM.addEventListener('click',()=>TIN.focus());
 
-/* ---------- CV generator ---------- */
 function downloadCV(){
   const cv=
 `════════════════════════════════════════════
-  LIXYNHAY — Systems Engineer & Researcher
+  LIXYNHAY — Embedded Engineer & Bot Dev
 ════════════════════════════════════════════
 GitHub:   https://github.com/lixynhay
 Telegram: https://t.me/lixynhay
 Email:    lixynhay@gmail.com
 
 ПРОФИЛЬ
-Инженер-исследователь, увлечённый низкоуровневой
-разработкой и системным программированием. Фокус —
-надёжные и эффективные решения на стыке железа и софта.
+Инженер, специализирующийся на Embedded-разработке
+и создании Telegram-ботов. Надёжные решения на стыке
+железа и софта.
 
 КОМПЕТЕНЦИИ
-• Linux Kernel — драйверы, модули, отладка
-• C / C++ — системное программирование
-• Rust — безопасная низкоуровневая разработка
-• ESP32 / Arduino — embedded, прошивки
-• GDB Debugging • Embedded Systems • Git • CI/CD
+• Python — боты, автоматизация, тулинг
+• Kotlin — современная строгая разработка
+• ESP32 / Arduino — прошивки, датчики, протоколы
+• Telegram Bot API — боты любой сложности
+• Embedded Systems • Git • CI/CD
 
 ── Сгенерировано автоматически на lixynhay.github.io ──
 P.S. Полная версия CV — по запросу в Telegram.`;
@@ -730,10 +924,10 @@ P.S. Полная версия CV — по запросу в Telegram.`;
   a.download='CV_LixynHay.txt';a.click();URL.revokeObjectURL(a.href);
   toast('CV_LixynHay.txt скачан ⬇');}
 
-/* ---------- command palette ---------- */
 const ACTIONS=[
  {l:'→ Главная',h:'#home',f:()=>go('#home')},
  {l:'→ Терминал',h:'#terminal',f:()=>go('#terminal')},
+ {l:'→ Python Lab',h:'#python',f:()=>go('#python')},
  {l:'→ Обо мне',h:'#about',f:()=>go('#about')},
  {l:'→ Статистика',h:'#stats',f:()=>go('#stats')},
  {l:'→ Проекты',h:'#projects',f:()=>go('#projects')},
@@ -742,6 +936,7 @@ const ACTIONS=[
  {l:'↗ Telegram',h:'open',f:()=>open(CFG.tg,'_blank')},
  {l:'✉️ Написать Email',h:'open',f:()=>location.href=CFG.mail},
  {l:'◐ Сменить тему',h:'cycle',f:cycleTheme},
+ {l:'▨ WebGL-шейдер: вкл/выкл',h:'fx',f:()=>{GLBG.toggle();toast('Shader: '+(GLBG.running?'ON':'OFF'));}},
  {l:'▦ Matrix: вкл/выкл',h:'fx',f:()=>MATRIX.toggle()},
  {l:'▤ Scanlines: вкл/выкл',h:'fx',f:()=>toggleScanlines()},
  {l:'♪ Звук: вкл/выкл',h:'fx',f:()=>toggleSound()},
@@ -754,7 +949,7 @@ function renderPalette(q=''){const list=$('#palette-list');
   palIdx=0;
   list.innerHTML=palItems.length?palItems.map((a,i)=>
     `<div class="palette-item${i===0?' sel':''}" data-i="${i}"><span>${esc(a.l)}</span><kbd>${esc(a.h)}</kbd></div>`).join('')
-    :'<div class="palette-empty">Ничего не найдено. Попробуйте «theme» или «matrix».</div>';
+    :'<div class="palette-empty">Ничего не найдено. Попробуйте «theme» или «shader».</div>';
   list.querySelectorAll('.palette-item').forEach(el=>{
     el.addEventListener('mouseenter',()=>setPalSel(+el.dataset.i));
     el.addEventListener('click',()=>execPal(+el.dataset.i));});}
@@ -774,7 +969,6 @@ $('#palette-btn').addEventListener('click',openPalette);
 $('#theme-btn').addEventListener('click',cycleTheme);
 $('#cv-btn').addEventListener('click',downloadCV);
 
-/* ---------- konami code ---------- */
 const KONAMI=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 let kIdx=0;
 addEventListener('keydown',e=>{
@@ -787,7 +981,6 @@ addEventListener('keydown',e=>{
       setTimeout(()=>document.body.classList.remove('godmode'),8000);}}
   else kIdx=0;});
 
-/* ---------- HUD: clock / uptime / fps / cpu ---------- */
 const T0=performance.now();
 function fmtUp(ms){const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;
   return [h,m,ss].map(v=>String(v).padStart(2,'0')).join(':');}
@@ -799,22 +992,25 @@ let cpu=4;setInterval(()=>{cpu=Math.max(2,Math.min(96,cpu+(Math.random()-.48)*7)
 let frames=0,fLast=performance.now();
 function loop(t){frames++;
   if(t-fLast>=1000){$('#fps').textContent=frames;frames=0;fLast=t;}
-  MATRIX.frame(t);requestAnimationFrame(loop);}
+  GLBG.frame(t);MATRIX.frame(t);requestAnimationFrame(loop);}
 
-/* ---------- scroll reveal & active nav ---------- */
 const io=new IntersectionObserver(es=>es.forEach(e=>{
   if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}}),{threshold:.12});
 $$('.reveal').forEach(el=>io.observe(el));
 const navIO=new IntersectionObserver(es=>es.forEach(e=>{
   if(e.isIntersecting){$$('.nav-links a').forEach(a=>
     a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));}}),{threshold:.35});
-['home','terminal','about','stats','projects'].forEach(id=>{const s=document.getElementById(id);if(s)navIO.observe(s);});
+['home','terminal','python','about','stats','projects'].forEach(id=>{const s=document.getElementById(id);if(s)navIO.observe(s);});
 
-/* ---------- init ---------- */
 applyTheme(store.get('lixy_theme','dark'),true);
 applyScanlines();
+const glOK=GLBG.init();
+GLBG.running=glOK&&store.get('lixy_gl','1')==='1'&&!REDUCED;
+GLBG.cv.style.display=GLBG.running?'block':'none';
+if(!glOK)console.warn('WebGL недоступен — фон остаётся на matrix');
 MATRIX.init();
 $('#year').textContent=new Date().getFullYear();
+initPythonLab();
 P('LixynHay Terminal v'+VERSION+' — ядро загружено.','t-ok');
 P('Введите <span class="t-accent">help</span> для списка команд. <span class="t-out">Ctrl+K — палитра.</span>');
 requestAnimationFrame(loop);
