@@ -390,24 +390,42 @@ body.godmode{animation:hue 1.6s linear infinite}
     </div>
   </section>
 
-  <!-- STATS -->
-  <section id="stats">
-    <h2 class="sec-title reveal"><span class="num">04</span>GITHUB СТАТИСТИКА</h2>
-    <p class="sec-sub reveal">curl -s api.github.com/users/lixynhay | jq '.stats'  ·  данные живые</p>
-    <p class="gh-note" id="gh-note"></p>
-    <div class="stats-cards">
-      <div class="stat-card reveal"><div class="stat-value" id="st-repos">0</div><div class="stat-label">Репозитории</div></div>
-      <div class="stat-card reveal"><div class="stat-value" id="st-followers">0</div><div class="stat-label">Фолловеры</div></div>
-      <div class="stat-card reveal"><div class="stat-value" id="st-stars">0</div><div class="stat-label">Всего звёзд</div></div>
-      <div class="stat-card reveal"><div class="stat-value" id="st-langs">0</div><div class="stat-label">Языки</div></div>
+  <section id="github-stats">
+    <div class="card">
+      <h3 data-ru="GitHub Статистика" data-en="GitHub Statistics"></h3>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-value" id="repoCount">-</div>
+          <div class="stat-label" data-ru="Репозитории" data-en="Repositories"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="followersCount">-</div>
+          <div class="stat-label" data-ru="Подписчики" data-en="Followers"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalStars">-</div>
+          <div class="stat-label" data-ru="Всего звёзд" data-en="Total Stars"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalForks">-</div>
+          <div class="stat-label" data-ru="Форки" data-en="Forks"></div>
+        </div>
+      </div>
+      <div class="charts-container">
+        <div class="chart-wrapper">
+          <canvas id="languageChart"></canvas>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="activityChart"></canvas>
+        </div>
+      </div>
     </div>
-    <div class="reveal">
-      <div class="lang-title">Распределение языков</div>
-      <div class="langbar" id="langbar"></div>
-      <div class="lang-legend" id="lang-legend"></div>
-      <div class="lang-title">Последняя активность</div>
-      <div id="activity"></div>
-    </div>
+  </section>
+
+  <section id="projects">
+    <h2 data-ru="Проекты" data-en="Projects" style="text-align: center; margin-bottom: 30px; font-size: 2rem;"></h2>
+    <div class="filter" id="projectFilters"></div>
+    <div class="grid" id="projectsGrid"></div>
   </section>
 
   <!-- PROJECTS -->
@@ -444,629 +462,363 @@ body.godmode{animation:hue 1.6s linear infinite}
 <div id="toast"></div>
 
 <script>
-'use strict';
-/* ============================================================
-   LIXYNHAY OS v3.9 — core
-   ============================================================ */
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const VERSION='3.9.0';
-const CFG={gh:'https://github.com/lixynhay',tg:'https://t.me/lixynhay',mail:'mailto:lixynhay@gmail.com',user:'lixynhay'};
-const store={get:(k,d)=>localStorage.getItem(k)??d,set:(k,v)=>localStorage.setItem(k,v)};
+(() => {
+  /* ---------- 1. Utils ---------- */
+  const $ = q => document.querySelector(q);
+  const on = (el, ev, fn) => el.addEventListener(ev, fn);
 
-/* ---------- toast ---------- */
-let toastTimer;
-function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
+  /* ---------- 2. Typewriter ---------- */
+  const text = "Hi!";
+  let i = 0;
+  function typeWriter() {
+    if (i < text.length) {
+      $("#typed").textContent += text.charAt(i);
+      i++;
+      setTimeout(typeWriter, 120);
+    }
+  }
+  typeWriter();
 
-/* ---------- clipboard ---------- */
-async function copyText(t){
-  try{await navigator.clipboard.writeText(t);return true;}
-  catch(e){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';
-    document.body.appendChild(ta);ta.select();
-    let ok=false;try{ok=document.execCommand('copy');}catch(_){}
-    ta.remove();return ok;}}
+  /* ---------- 3. Parallax ---------- */
+  on(window, "scroll", () => {
+    const y = window.scrollY;
+    $("header h1").style.transform = `translateY(${y * 0.3}px)`;
+    $("header p").style.transform = `translateY(${y * 0.2}px)`;
+  });
 
-/* ---------- sound (Web Audio, no files) ---------- */
-const SFX={ctx:null,on:store.get('lixy_sound','0')==='1',
-  init(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}},
-  beep(f=520,d=.05,type='square',g=.02){if(!this.on)return;this.init();const c=this.ctx;if(!c)return;
-    if(c.state==='suspended')c.resume();const o=c.createOscillator(),v=c.createGain();
-    o.type=type;o.frequency.value=f;v.gain.value=g;o.connect(v);v.connect(c.destination);o.start();
-    v.gain.exponentialRampToValueAtTime(.0001,c.currentTime+d);o.stop(c.currentTime+d);},
-  key(){this.beep(480+Math.random()*240,.03,'square',.012)},
-  ok(){this.beep(880,.09,'sine',.03)},
-  err(){this.beep(130,.22,'sawtooth',.04)}};
+  /* ---------- 4. Smooth scroll ---------- */
+  window.scrollToSection = id => {
+    const el = $(`#${id}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
-/* ---------- WebGL shader background ---------- */
-const GLBG={cv:document.getElementById('glbg'),gl:null,running:false,last:0,cols:null,
-  init(){
-    const gl=this.cv.getContext('webgl',{antialias:false,alpha:false,depth:false,stencil:false});
-    if(!gl)return false;
-    this.gl=gl;
-    const vs='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
-    const fs=`precision mediump float;
-uniform float t;uniform vec2 r;uniform vec3 bg;uniform vec3 c1;uniform vec3 c2;
-float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
-return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}
-float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p*=2.03;a*=.5;}return v;}
-void main(){
- vec2 uv=gl_FragCoord.xy/r;
- vec2 p=(gl_FragCoord.xy-.5*r)/r.y;
- float q=fbm(p*3.+t*.12);
- float waves=sin(p.x*7.+t*.8+q*5.)*.5+.5;
- float glow=smoothstep(.35,.75,q);
- vec3 col=mix(bg,c1,glow*.55);
- col+=c2*pow(waves,3.)*.22*(.4+q);
- col*=1.-dot(uv-.5,uv-.5)*1.1;
- gl_FragColor=vec4(col,1.);}`;
-    const mk=(type,src)=>{const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
-      if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){console.warn(gl.getShaderInfoLog(s));return null;}return s;};
-    const v=mk(gl.VERTEX_SHADER,vs),f=mk(gl.FRAGMENT_SHADER,fs);
-    if(!v||!f)return false;
-    const pr=gl.createProgram();gl.attachShader(pr,v);gl.attachShader(pr,f);gl.linkProgram(pr);
-    if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return false;
-    gl.useProgram(pr);
-    const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
-    const loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-    this.uT=gl.getUniformLocation(pr,'t');this.uR=gl.getUniformLocation(pr,'r');
-    this.uBg=gl.getUniformLocation(pr,'bg');this.uC1=gl.getUniformLocation(pr,'c1');this.uC2=gl.getUniformLocation(pr,'c2');
-    addEventListener('resize',()=>this.resize());this.resize();this.recolor();
-    return true;},
-  resize(){if(!this.gl)return;
-    this.cv.width=Math.max(2,innerWidth>>1);this.cv.height=Math.max(2,innerHeight>>1);
-    this.gl.viewport(0,0,this.cv.width,this.cv.height);},
-  recolor(){if(!this.gl)return;
-    const cs=getComputedStyle(document.documentElement);
-    const hx=k=>{const m=/^#?([0-9a-f]{6})$/i.exec(cs.getPropertyValue(k).trim());
-      return m?[parseInt(m[1].slice(0,2),16)/255,parseInt(m[1].slice(2,4),16)/255,parseInt(m[1].slice(4,6),16)/255]:[0,0,0];};
-    this.cols={bg:hx('--bg'),c1:hx('--accent'),c2:hx('--accent2')};},
-  frame(t){if(!this.running||!this.gl||t-this.last<33)return;this.last=t;
-    const gl=this.gl;
-    gl.uniform1f(this.uT,t/1000);gl.uniform2f(this.uR,this.cv.width,this.cv.height);
-    gl.uniform3fv(this.uBg,this.cols.bg);gl.uniform3fv(this.uC1,this.cols.c1);gl.uniform3fv(this.uC2,this.cols.c2);
-    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);},
-  toggle(v){this.running=v??!this.running;store.set('lixy_gl',this.running?'1':'0');
-    this.cv.style.display=this.running?'block':'none';}};
+  /* ---------- 5. Language auto + fallback ---------- */
+  const RU = "ru", EN = "en";
+  function applyLang(lang) {
+    const l = (lang === RU || lang === EN) ? lang : RU;
+    document.querySelectorAll("[data-ru]").forEach(el => {
+      el.textContent = el.dataset[l] || el.dataset.ru;
+    });
+    localStorage.userLang = l;
+  }
+  window.setLang = code => applyLang(code);
 
-/* ---------- matrix rain ---------- */
-const MATRIX={cv:document.getElementById('matrix'),ctx:null,running:false,drops:[],last:0,
-  chars:'アイウエオカキクケコサシスセソタチツテト01<>/{}[]#$%&*+=?',
-  init(){this.ctx=this.cv.getContext('2d');
-    addEventListener('resize',()=>this.resize());
-    this.running=store.get('lixy_matrix','1')==='1'&&!REDUCED;
-    if(this.running)this.start();},
-  resize(){this.cv.width=innerWidth;this.cv.height=innerHeight;
-    const cols=Math.floor(innerWidth/16);
-    this.drops=Array.from({length:cols},()=>Math.random()*-60);},
-  start(){this.resize();this.cv.style.display='block';},
-  stop(){this.cv.style.display='none';},
-  toggle(v){this.running=v??!this.running;store.set('lixy_matrix',this.running?'1':'0');
-    this.running?this.start():this.stop();},
-  frame(t){if(!this.running||t-this.last<45)return;this.last=t;
-    const x=this.ctx,cs=getComputedStyle(document.documentElement);
-    const bg=cs.getPropertyValue('--bg').trim(),ac=cs.getPropertyValue('--accent').trim();
-    x.fillStyle=bg+'E6';x.fillRect(0,0,this.cv.width,this.cv.height);
-    x.fillStyle=ac;x.font='14px monospace';
-    for(let i=0;i<this.drops.length;i++){
-      const ch=this.chars[Math.random()*this.chars.length|0];
-      x.fillText(ch,i*16,this.drops[i]*16);
-      if(this.drops[i]*16>this.cv.height&&Math.random()>.975)this.drops[i]=0;
-      this.drops[i]++;}}};
+  async function autoLang() {
+    if (localStorage.userLang) {
+      applyLang(localStorage.userLang);
+      return;
+    }
+    try {
+      const geo = await fetch("https://ipapi.co/json").then(r => r.json());
+      const country = geo.country_code;
+      if (["US", "GB", "CA", "AU"].includes(country)) {
+        applyLang(EN);
+        return;
+      }
+    } catch (e) {}
+    const navLang = navigator.language.slice(0, 2).toLowerCase();
+    applyLang(navLang === "en" ? EN : RU);
+  }
+  on(document, "DOMContentLoaded", autoLang);
 
-/* ---------- theme / fx toggles ---------- */
-const THEMES=['dark','amber','light'];
-function applyTheme(t,quiet){document.documentElement.dataset.theme=t;store.set('lixy_theme',t);
-  $('#theme-label').textContent=t.toUpperCase();GLBG.recolor();
-  if(!quiet)toast('Тема: '+t.toUpperCase());}
-function cycleTheme(){const i=THEMES.indexOf(document.documentElement.dataset.theme);
-  applyTheme(THEMES[(i+1)%THEMES.length]);}
-function applyScanlines(){document.body.classList.toggle('scanlines-on',store.get('lixy_scan','0')==='1');}
-function toggleScanlines(v){const nv=v??!(store.get('lixy_scan','0')==='1');
-  store.set('lixy_scan',nv?'1':'0');applyScanlines();toast('Scanlines: '+(nv?'ON':'OFF'));}
-function toggleSound(v){SFX.on=v??!SFX.on;store.set('lixy_sound',SFX.on?'1':'0');
-  toast('Звук: '+(SFX.on?'ON':'OFF'));if(SFX.on)SFX.ok();}
+  /* ---------- 6. Theme ---------- */
+  function applyTheme() {
+    const stored = localStorage.theme;
+    const prefers = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "";
+    const theme = stored || prefers;
+    document.body.classList.toggle("light", theme === "light");
+  }
+  window.toggleTheme = () => {
+    document.body.classList.toggle("light");
+    localStorage.theme = document.body.classList.contains("light") ? "light" : "";
+  };
+  on(document, "DOMContentLoaded", applyTheme);
 
-/* ---------- boot ---------- */
-const BOOT_LINES=[
-'LIXY-BIOS v3.9 — QWEN CORE INIT',
-'CPU0: LixynHay Neural Engine @ 4.20GHz ............ OK',
-'Memory Test: 65536 MB ............................. OK',
-'Detecting drives: /dev/portfolio .................. OK',
-'Loading modules: [python] [kotlin] [esp32] [bots] . OK',
-'Starting services: github-api bot-daemon coffee ... OK',
-'Initializing WebGL shader pipeline ................ OK',
-'Mounting interface /dev/ui0 ....................... OK',
-'',
-'>> BOOTING LIXYNHAY OS…'];
-async function boot(){const ov=document.getElementById('boot');
-  if(REDUCED){ov.remove();return;}
-  const log=document.getElementById('boot-log'),fill=document.getElementById('boot-fill');let skipped=false;
-  const finish=()=>{if(skipped)return;skipped=true;ov.classList.add('done');setTimeout(()=>ov.remove(),520);};
-  ov.addEventListener('click',finish);
-  addEventListener('keydown',function sk(){finish();removeEventListener('keydown',sk);});
-  for(let i=0;i<BOOT_LINES.length;i++){if(skipped)break;
-    log.textContent+=BOOT_LINES[i]+'\n';
-    fill.style.width=((i+1)/BOOT_LINES.length*100)+'%';
-    SFX.beep(180+i*70,.03,'square',.01);
-    await sleep(80+Math.random()*130);}
-  await sleep(350);finish();}
+  /* ---------- 7. CV ---------- */
+  window.downloadCV = () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text(`LixynHay\nEngineer & Systems Researcher\n\nSkills:\n- Linux Kernel & Drivers\n- ESP32 / Arduino\n- C / C++ Programming\n- Debugging & Log Analysis\n- Hardware & Soldering\n\nGitHub: github.com/lixynhay`, 10, 10);
+    doc.save("LixynHay_CV.pdf");
+  };
 
-/* ---------- hero ---------- */
-const HERO_SCRIPT=[
-  ['whoami','lixynhay — embedded engineer & telegram bot developer'],
-  ['uname -a','LixOS 6.9.42-lixy x86_64 GNU/Linux'],
-  ['./init --mission','[ embedded ]  [ telegram bots ]  [ python ]  [ kotlin ]'],
-  ['echo $STACK','Python + Kotlin + ESP32. Железо и боты живут дружно.'],
-];
-async function typeInto(el,text,speed=28){for(const ch of text){el.textContent+=ch;await sleep(speed);}}
-async function heroTermLoop(){const out=$('#hero-term');
-  if(REDUCED){out.innerHTML=HERO_SCRIPT.map(([c,r])=>
-    `<div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">${esc(c)}</span></div><div class="t-out">${esc(r)}</div>`).join('');return;}
-  for(;;){out.innerHTML='';
-    for(const [cmd,res] of HERO_SCRIPT){
-      const line=document.createElement('div');line.className='t-line';
-      line.innerHTML='<span class="t-prompt">lixynhay@lixy:~$ </span><span class="t-cmd"></span>';
-      out.appendChild(line);SFX.key();
-      await typeInto(line.querySelector('.t-cmd'),cmd,45);
-      await sleep(280);
-      const o=document.createElement('div');o.className='t-out';out.appendChild(o);
-      await typeInto(o,res,16);await sleep(950);}
-    await sleep(2600);}}
-const ROLES=['Embedded Engineer','Telegram Bot Developer','Python Developer','Kotlin Developer','Hardware Whisperer'];
-async function roleLoop(){const el=$('#role-text');
-  if(REDUCED){el.textContent=ROLES[0];return;}
-  for(;;){for(const r of ROLES){
-    for(let i=0;i<=r.length;i++){el.textContent=r.slice(0,i);await sleep(48);}
-    await sleep(1500);
-    for(let i=r.length;i>=0;i--){el.textContent=r.slice(0,i);await sleep(20);}
-    await sleep(260);}}}
+  /* ---------- 8. GitHub Stats & Projects ---------- */
+  const CACHE_KEY = "gh-cache";
+  const USER_CACHE_KEY = "gh-user-cache";
+  const CACHE_TTL = 1000 * 60 * 10;
+  let allRepos = [];
+  let userProfile = null;
+  let languageChartInstance = null;
+  let activityChartInstance = null;
 
-/* ---------- GitHub live data ---------- */
-let GH_CACHE=null;
-async function loadGH(){if(GH_CACHE)return GH_CACHE;
-  const u=await fetch('https://api.github.com/users/'+CFG.user);
-  if(!u.ok)throw new Error('HTTP '+u.status);
-  const user=await u.json();
-  const r=await fetch('https://api.github.com/users/'+CFG.user+'/repos?per_page=100&sort=updated');
-  const repos=await r.json();
-  if(!Array.isArray(repos))throw new Error('bad repos payload');
-  GH_CACHE={user,repos};return GH_CACHE;}
-const LANG_COLORS={C:'#555555','C++':'#f34b79',Python:'#3572A5',Kotlin:'#A97BFF',
-  JavaScript:'#f1e05a',TypeScript:'#3178c6',Shell:'#89e051',Makefile:'#427819',
-  HTML:'#e34c26',CSS:'#563d7c',Go:'#00ADD8',CMake:'#DA3434',Assembly:'#6E4C13',
-  Rust:'#dea584',Dockerfile:'#384d54'};
-const langColor=l=>LANG_COLORS[l]||'#8b949e';
-function timeAgo(iso){const d=Math.floor((Date.now()-new Date(iso))/864e5);
-  if(d<1)return 'сегодня';if(d<2)return 'вчера';
-  if(d<31)return d+' дн. назад';const m=Math.floor(d/30);return m+' мес. назад';}
-function animateCount(el,val){if(val==null){el.textContent='—';return;}
-  const t0=performance.now(),dur=1300;
-  (function f(t){const p=Math.min(1,(t-t0)/dur);
-    el.textContent=Math.round(val*(1-Math.pow(1-p,3)));
-    if(p<1)requestAnimationFrame(f);})(t0);}
-function renderStats({user,repos}){
-  const stars=repos.reduce((s,r)=>s+r.stargazers_count,0);
-  const langs={};repos.forEach(r=>{if(r.language)langs[r.language]=(langs[r.language]||0)+(r.size||1);});
-  animateCount($('#st-repos'),user.public_repos);
-  animateCount($('#st-followers'),user.followers);
-  animateCount($('#st-stars'),stars);
-  animateCount($('#st-langs'),Object.keys(langs).length);
-  const total=Object.values(langs).reduce((a,b)=>a+b,0)||1;
-  const sorted=Object.entries(langs).sort((a,b)=>b[1]-a[1]).slice(0,7);
-  $('#langbar').innerHTML=sorted.map(([l,v])=>
-    `<i style="width:${(v/total*100).toFixed(1)}%;background:${langColor(l)}" title="${esc(l)}"></i>`).join('');
-  $('#lang-legend').innerHTML=sorted.map(([l,v])=>
-    `<span><span class="sw" style="background:${langColor(l)}"></span>${esc(l)} ${(v/total*100).toFixed(0)}%</span>`).join('')||'<span>—</span>';
-  const recent=[...repos].sort((a,b)=>new Date(b.pushed_at)-new Date(a.pushed_at)).slice(0,5);
-  $('#activity').innerHTML=recent.map(r=>
-    `<div class="activity-row"><span>→ <a href="${esc(r.html_url)}" target="_blank" rel="noopener" style="text-decoration:none">${esc(r.name)}</a></span><span class="ago">${timeAgo(r.pushed_at)}</span></div>`).join('');}
-function renderProjects(repos,demo){
-  const grid=$('#projects-grid');
-  const top=[...repos].sort((a,b)=>(b.stargazers_count-a.stargazers_count)||(new Date(b.pushed_at)-new Date(a.pushed_at))).slice(0,6);
-  if(!top.length){grid.innerHTML='<div class="t-out">Публичных репозиториев пока нет — но это временно 😏</div>';return;}
-  grid.innerHTML=top.map(r=>`
-    <div class="card reveal visible">
-      ${demo?'<span class="demo-badge">DEMO</span>':''}
-      <div class="card-head">
-        <a class="card-name" href="${esc(r.html_url)}" target="_blank" rel="noopener">${esc(r.name)}</a>
-        <span class="card-stars">★ ${r.stargazers_count}  ⑂ ${r.forks_count}</span>
-      </div>
-      <p class="card-desc">${esc(r.description||'Без описания. Настоящий инженер комментирует код, а не README.')}</p>
-      <div class="card-meta">
-        <span><span class="lang-dot" style="background:${langColor(r.language)}"></span>${esc(r.language||'—')}</span>
-        <span class="upd">⟳ ${timeAgo(r.pushed_at)}</span>
-        <span class="card-actions">
-          <button class="mini-btn copy-btn" data-url="${esc(r.html_url)}" title="Скопировать ссылку на репозиторий">⧉ copy</button>
-          <a class="mini-btn" href="${esc(r.html_url)}" target="_blank" rel="noopener">открыть ↗</a>
-        </span>
-      </div>
-    </div>`).join('');}
-const DEMO_REPOS=[
- {name:'esp32-firmware',description:'[demo] Прошивки и эксперименты на ESP32',language:'C++',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh},
- {name:'telegram-bot-kit',description:'[demo] Заготовки и утилиты для Telegram-ботов',language:'Python',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh},
- {name:'kotlin-playground',description:'[demo] Kotlin-эксперименты и инструменты',language:'Kotlin',stargazers_count:0,forks_count:0,pushed_at:new Date().toISOString(),html_url:CFG.gh}];
-async function initGitHub(){
-  try{const d=await loadGH();renderStats(d);renderProjects(d.repos,false);
-    $('#gh-note').textContent='// данные получены через GitHub API в реальном времени';}
-  catch(e){console.warn('GitHub API:',e);
-    $('#gh-note').textContent='// GitHub API недоступен (rate limit 60 req/час или оффлайн) — показан демо-режим';
-    ['st-repos','st-followers','st-stars','st-langs'].forEach(id=>$('#'+id).textContent='—');
-    $('#langbar').innerHTML='';$('#lang-legend').innerHTML='<span>оффлайн</span>';
-    $('#activity').innerHTML='<div class="activity-row"><span>→ подключение к api.github.com…</span><span class="ago">timeout</span></div>';
-    renderProjects(DEMO_REPOS,true);}}
-/* копирование ссылок с карточек */
-$('#projects-grid').addEventListener('click',async e=>{
-  const b=e.target.closest('.copy-btn');if(!b)return;
-  e.preventDefault();e.stopPropagation();
-  const ok=await copyText(b.dataset.url);
-  if(ok){toast('Ссылка скопирована ⧉');SFX.ok();
-    const old=b.textContent;b.textContent='✓ copied';
-    setTimeout(()=>b.textContent=old,1300);}
-  else{toast('Не удалось скопировать');SFX.err();}});
+  async function fetchWithCache(key, url, ttl = CACHE_TTL) {
+    const cached = sessionStorage.getItem(key);
+    if (cached) {
+      const { ts, data } = JSON.parse(cached);
+      if (Date.now() - ts < ttl) return data;
+    }
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+    const data = await res.json();
+    sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+    return data;
+  }
 
-/* ---------- Python Lab (Pyodide) ---------- */
-const SAMPLES={
-'Старт: fib + GPIO':`# Python Lab — код выполняется прямо в браузере (Pyodide/WASM)
-# Ctrl+Enter — запуск
+  async function loadGitHubData() {
+    try {
+      // Load user profile
+      userProfile = await fetchWithCache(USER_CACHE_KEY, "https://api.github.com/users/lixynhay");
+      
+      // Load repos
+      allRepos = await fetchWithCache(CACHE_KEY, "https://api.github.com/users/lixynhay/repos?per_page=100");
+      allRepos = allRepos.filter(r => !r.fork);
+      
+      // Update stats
+      updateStats();
+      
+      // Create charts
+      createCharts();
+      
+      // Load projects
+      populateFilters();
+      showProjects();
+    } catch (error) {
+      console.error("Error loading GitHub data:", error);
+      $("#statsGrid").innerHTML = `<p style="text-align:center;color:var(--text-secondary)">Не удалось загрузить данные GitHub. Попробуйте позже.</p>`;
+    }
+  }
 
-def fib(n):
-    a, b = 0, 1
-    for _ in range(n):
-        a, b = b, a + b
-    return a
+  function updateStats() {
+    if (!userProfile) return;
+    
+    $("#repoCount").textContent = userProfile.public_repos || 0;
+    $("#followersCount").textContent = userProfile.followers || 0;
+    
+    const totalStars = allRepos.reduce((sum, r) => sum + (r.stargazers_count || 0), 0);
+    const totalForks = allRepos.reduce((sum, r) => sum + (r.forks_count || 0), 0);
+    
+    $("#totalStars").textContent = totalStars;
+    $("#totalForks").textContent = totalForks;
+  }
 
-print("Fibonacci(30) =", fib(30))
+  function createCharts() {
+    // Language distribution chart
+    const langCounts = {};
+    allRepos.forEach(r => {
+      const lang = r.language || "Other";
+      langCounts[lang] = (langCounts[lang] || 0) + 1;
+    });
+    
+    const langLabels = Object.keys(langCounts);
+    const langData = Object.values(langCounts);
+    const colors = [
+      '#38bdf8', '#a855f7', '#f472b6', '#fbbf24', '#34d399',
+      '#fb923c', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16'
+    ];
 
-# немного embedded-магии: манипуляция "регистром"
-GPIO_PORT = 0b0000_0000
-GPIO_PORT |= (1 << 2)    # поднять пин 2
-GPIO_PORT &= ~(1 << 0)   # опустить пин 0
-print(f"GPIO: {GPIO_PORT:08b}")`,
-'Telegram-бот (симуляция)':`# Симуляция обработчиков Telegram-бота (без сети)
-users = {}
+    const langCtx = document.getElementById('languageChart').getContext('2d');
+    if (languageChartInstance) languageChartInstance.destroy();
+    
+    languageChartInstance = new Chart(langCtx, {
+      type: 'doughnut',
+      data: {
+        labels: langLabels,
+        datasets: [{
+          data: langData,
+          backgroundColor: colors.slice(0, langLabels.length),
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: getComputedStyle(document.body).getPropertyValue('--text'), padding: 15 }
+          },
+          title: {
+            display: true,
+            text: 'Языки программирования',
+            color: getComputedStyle(document.body).getPropertyValue('--accent'),
+            font: { size: 16, weight: 'bold' }
+          }
+        }
+      }
+    });
 
-def start(update):
-    uid = update["from"]["id"]
-    users[uid] = {"name": update["from"]["first_name"], "msgs": 0}
-    return f"Привет, {users[uid]['name']}! Я бот."
+    // Repository activity chart (last 12 months by creation)
+    const now = new Date();
+    const monthLabels = [];
+    const repoCounts = [];
+    
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthName = date.toLocaleString('en-US', { month: 'short' });
+      monthLabels.push(monthName);
+      
+      const reposInMonth = allRepos.filter(r => {
+        const created = new Date(r.created_at);
+        return created.getMonth() === date.getMonth() && created.getFullYear() === date.getFullYear();
+      }).length;
+      
+      repoCounts.push(reposInMonth);
+    }
 
-def message(update):
-    uid = update["from"]["id"]
-    users[uid]["msgs"] += 1
-    return f"Сообщение #{users[uid]['msgs']} принято."
+    const actCtx = document.getElementById('activityChart').getContext('2d');
+    if (activityChartInstance) activityChartInstance.destroy();
+    
+    activityChartInstance = new Chart(actCtx, {
+      type: 'bar',
+      data: {
+        labels: monthLabels,
+        datasets: [{
+          label: 'Репозитории',
+          data: repoCounts,
+          backgroundColor: 'rgba(56, 189, 248, 0.7)',
+          borderColor: '#38bdf8',
+          borderWidth: 1,
+          borderRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-secondary') },
+            grid: { color: 'rgba(255,255,255,0.05)' }
+          },
+          x: {
+            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-secondary') },
+            grid: { display: false }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          title: {
+            display: true,
+            text: 'Активность по месяцам',
+            color: getComputedStyle(document.body).getPropertyValue('--accent'),
+            font: { size: 16, weight: 'bold' }
+          }
+        }
+      }
+    });
+  }
 
-updates = [
-    {"from": {"id": 1, "first_name": "Lixyn"}},
-    {"from": {"id": 1}, "text": "hello"},
-    {"from": {"id": 1}, "text": "world"},
-]
+  function populateFilters() {
+    const langs = ["All", ...new Set(allRepos.map(r => r.language).filter(l => l))];
+    const filterDiv = $("#projectFilters");
+    filterDiv.innerHTML = "";
+    langs.forEach((l, idx) => {
+      const btn = document.createElement("button");
+      btn.textContent = l;
+      btn.className = idx === 0 ? "active" : "";
+      btn.onclick = () => {
+        filterDiv.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        showProjects(l === "All" ? null : l);
+      };
+      filterDiv.appendChild(btn);
+    });
+  }
 
-print(start(updates[0]))
-for u in updates[1:]:
-    print(message(u))
-print("База юзеров:", users)`,
-'Таймер-декоратор + решето':`import time
+  function showProjects(lang = null) {
+    const grid = $("#projectsGrid");
+    grid.innerHTML = "";
+    allRepos
+      .filter(r => !lang || r.language === lang)
+      .sort((a, b) => b.stargazers_count - a.stargazers_count)
+      .slice(0, 12)
+      .forEach(r => {
+        const card = document.createElement("div");
+        card.className = "card project-card";
+        card.innerHTML = `
+          <div class="project-header">
+            <h4 class="project-title">${r.name}</h4>
+            ${r.language ? `<span class="project-lang-badge">${r.language}</span>` : ''}
+          </div>
+          <p class="project-desc">${r.description || "Без описания"}</p>
+          <div class="project-stats">
+            <span class="project-stat">⭐ ${r.stargazers_count}</span>
+            <span class="project-stat">🍴 ${r.forks_count}</span>
+            ${r.homepage ? `<span class="project-stat">🔗 <a href="${r.homepage}" target="_blank">Site</a></span>` : ''}
+          </div>
+          <div style="margin-top: 15px;">
+            <a href="${r.html_url}" target="_blank" rel="noopener noreferrer">Открыть на GitHub →</a>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+  }
 
-def timer(fn):
-    def wrap(*a, **k):
-        t0 = time.perf_counter()
-        r = fn(*a, **k)
-        print(f"{fn.__name__}: {(time.perf_counter()-t0)*1000:.3f} ms")
-        return r
-    return wrap
+  loadGitHubData();
 
-@timer
-def sieve(n):
-    flags = [True] * (n + 1)
-    for i in range(2, int(n ** 0.5) + 1):
-        if flags[i]:
-            for j in range(i * i, n + 1, i):
-                flags[j] = False
-    return sum(flags[2:])
+  /* ---------- 9. Scroll reveal ---------- */
+  const sections = document.querySelectorAll("section");
+  const reveal = () => {
+    const trigger = window.scrollY + window.innerHeight * 0.75;
+    sections.forEach(sec => {
+      if (sec.offsetTop < trigger) sec.classList.add("visible");
+    });
+  };
+  on(window, "scroll", reveal);
+  reveal();
 
-print("Простых до 100000:", sieve(100_000))`};
-const PY={ready:false,loading:null};
-function pyStatus(text,cls){const el=$('#py-status');el.textContent=text;el.className='py-status '+(cls||'');}
-function loadScript(src){return new Promise((res,rej)=>{
-  const s=document.createElement('script');s.src=src;s.onload=res;
-  s.onerror=()=>rej(new Error('не удалось загрузить '+src));document.body.appendChild(s);});}
-async function ensurePy(){
-  if(PY.ready)return window._py;
-  if(!PY.loading){PY.loading=(async()=>{
-    pyStatus('загружаю Pyodide (~10 МБ)…','load');
-    if(!window.loadPyodide)await loadScript('https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js');
-    const py=await window.loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/'});
-    window._py=py;PY.ready=true;pyStatus('интерпретатор готов ✓','ok');SFX.ok();
-    return py;
-  })().catch(e=>{PY.loading=null;pyStatus('ошибка: '+e.message,'err');throw e;});}
-  return PY.loading;}
-async function runPy(){
-  const code=$('#py-code').value,out=$('#py-out');
-  out.textContent='';
-  let py;try{py=await ensurePy();}catch(e){out.textContent='⚠ '+e.message+'\n(нужен доступ к CDN jsdelivr)';return;}
-  pyStatus('выполняю…','load');
-  let buf='';
-  try{
-    py.setStdout({batched:s=>buf+=s+'\n'});
-    py.setStderr({batched:s=>buf+='[stderr] '+s+'\n'});
-    await py.runPythonAsync(code);
-  }catch(e){buf+='[exception]\n'+e.message+'\n';}
-  out.textContent=buf||'(пусто — добавьте print())';
-  pyStatus('интерпретатор готов ✓','ok');}
-function initPythonLab(){
-  const sel=$('#py-samples'),code=$('#py-code');
-  const keys=Object.keys(SAMPLES);
-  sel.innerHTML=keys.map(k=>`<option>${esc(k)}</option>`).join('');
-  code.value=SAMPLES[keys[0]];
-  sel.addEventListener('change',()=>{code.value=SAMPLES[sel.value];$('#py-out').textContent='';});
-  $('#py-run').addEventListener('click',runPy);
-  $('#py-clear').addEventListener('click',()=>{code.value='';$('#py-out').textContent='';code.focus();});
-  code.addEventListener('keydown',e=>{
-    if(e.key==='Tab'){e.preventDefault();
-      const s=code.selectionStart,ep=code.selectionEnd;
-      code.value=code.value.slice(0,s)+'    '+code.value.slice(ep);
-      code.selectionStart=code.selectionEnd=s+4;}
-    if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runPy();}});}
+  /* ---------- 10. Canvas particles (Retina) ---------- */
+  const c = $("#bg");
+  const ctx = c.getContext("2d");
+  let w, h, dpr, particles, mouse = { x: null, y: null };
 
-/* ---------- interactive terminal ---------- */
-const TERM=$('#term-out'),TIN=$('#term-input');
-const P=(html,cls='t-out')=>{const d=document.createElement('div');d.className=cls;d.innerHTML=html;TERM.appendChild(d);TERM.scrollTop=TERM.scrollHeight;return d;};
-const FILES={
- 'about.txt':'Embedded-инженер и разработчик Telegram-ботов.\nPython + Kotlin + ESP32. Железо, боты, автоматизация.',
- 'skills.sys':'MODULES LOADED: python.ko kotlin.ko esp32.ko telegram_bot_api.ko embedded.ko git.ko cicd.ko',
- 'contact.ini':'[links]\ngithub=https://github.com/lixynhay\ntelegram=https://t.me/lixynhay\nemail=lixynhay@gmail.com',
- '.secret':'Ты нашёл скрытый файл. Теперь ты официально один из нас. 🤝\nПопробуй Konami-код: ↑ ↑ ↓ ↓ ← → ← → B A'};
-const BANNER=String.raw`
-██╗     ██╗██╗  ██╗██╗   ██╗███╗   ██╗██╗  ██╗ █████╗ ██╗   ██╗
-██║     ██║╚██╗██╔╝╚██╗ ██╔╝████╗  ██║██║  ██║██╔══██╗╚██╗ ██╔╝
-██║     ██║ ╚███╔╝  ╚████╔╝ ██╔██╗ ██║███████║███████║ ╚████╔╝ 
-██║     ██║ ██╔██╗   ╚██╔╝  ██║╚██╗██║██╔══██║██╔══██║  ╚██╔╝  
-███████╗██║██╔╝ ██╗   ██║   ██║ ╚████║██║  ██║██║  ██║   ██║   
-╚══════╝╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   `;
-const NEOFETCH=String.raw`
-    ┌─────────────┐    lixynhay@core
-    │ ▓▓▓▓▓▓▓▓▓▓▓ │    ─────────────────────────
-    │ ▓  LIXY-OS ▓ │    OS:       LixOS rolling x86_64
-    │ ▓▓▓▓▓▓▓▓▓▓▓ │    Host:     Human v2.x (carbon-based)
-    └──┬───────┬──┘    Kernel:   6.9.42-lixy
-   ────┴───────┴────   Uptime:   с самого детства
-                        Shell:    lixy-term v${VERSION}
-                        Stack:    Python / Kotlin / ESP32`;
-const COMMANDS={
- help(){P('Доступные команды:','t-accent');
-   [['help','эта справка'],['whoami','кто я такой'],['skills','стек технологий'],
-    ['projects','проекты с GitHub'],['copy <репо>','скопировать ссылку на репозиторий'],
-    ['stats','статистика GitHub'],['python','открыть Python Lab'],
-    ['neofetch','инфа о системе'],['contact','связь'],
-    ['github / tg / mail','открыть ссылки'],['cv','скачать резюме'],
-    ['theme [dark|amber|light]','смена темы'],
-    ['shader / matrix / scanlines / sound [on|off]','эффекты'],
-    ['ls / cat <файл>','файловая система'],['echo, date, uptime, banner, clear','утилиты'],
-    ['hack','взлом Пентагона'],['sudo','попробуй…'],['hint','подсказки']].forEach(([c,d])=>
-     P(`  <span class="t-accent">${c}</span>`.padEnd(44)+` <span class="t-out">— ${d}</span>`));},
- whoami(){P('<span class="t-ok">LixynHay</span> — Embedded Engineer &amp; Telegram Bot Developer');
-   P('uid=1000(lixynhay) gid=1000(engineers) groups=embedded,bots,python,kotlin');},
- skills(){P('Python · Kotlin · ESP32/Arduino · Telegram Bot API · Embedded Systems · Git · CI/CD','t-ok');},
- async projects(){try{const d=await loadGH();
-     const top=[...d.repos].sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,8);
-     if(!top.length)return P('Публичных репозиториев пока нет.','t-out');
-     top.forEach(r=>P(`  <span class="t-accent">${esc(r.name)}</span>  ★${r.stargazers_count}  [${esc(r.language||'—')}]  <span class="t-out">${esc(r.html_url)}</span>`));
-     P('Скопировать ссылку: <span class="t-accent">copy &lt;имя-репо&gt;</span>');
-   }catch(e){P('GitHub API недоступен (rate limit). Загляните в секцию «Проекты» ниже.','t-err');}},
- async copy(a){const name=a.join(' ').toLowerCase();
-   if(!name){P('Использование: <span class="t-accent">copy &lt;имя-репозитория&gt;</span>. Список: projects','t-out');return;}
-   try{const d=await loadGH();
-     const r=d.repos.find(x=>x.name.toLowerCase()===name)||d.repos.find(x=>x.name.toLowerCase().includes(name));
-     if(!r)return P('Репозиторий не найден: '+esc(name),'t-err');
-     const ok=await copyText(r.html_url);
-     if(ok){P('Скопировано в буфер: '+esc(r.html_url),'t-ok');toast('Ссылка скопирована ⧉');}
-     else P('Буфер обмена недоступен.','t-err');
-   }catch(e){P('GitHub API недоступен.','t-err');}},
- async stats(){try{const d=await loadGH();
-     const stars=d.repos.reduce((s,r)=>s+r.stargazers_count,0);
-     P(`repos: <span class="t-ok">${d.user.public_repos}</span>   followers: <span class="t-ok">${d.user.followers}</span>   total stars: <span class="t-ok">${stars}</span>`);}
-   catch(e){P('GitHub API недоступен (rate limit).','t-err');}},
- python(){document.querySelector('#python').scrollIntoView({behavior:'smooth'});
-   setTimeout(()=>$('#py-code').focus({preventScroll:true}),600);
-   P('Python Lab открыт. Ctrl+Enter — запуск.','t-ok');},
- contact(){P('GitHub:  <span class="t-accent">https://github.com/lixynhay</span>');
-   P('Telegram: <span class="t-accent">https://t.me/lixynhay</span>');
-   P('Email: <span class="t-accent">lixynhay@gmail.com</span>');},
- github(){open(CFG.gh,'_blank');P('Открываю GitHub…','t-ok');},
- tg(){open(CFG.tg,'_blank');P('Открываю Telegram…','t-ok');},
- mail(){location.href=CFG.mail;P('Открываю почтовый клиент…','t-ok');},
- theme(a){const t=a[0];
-   if(t&&THEMES.includes(t)){applyTheme(t);P('Тема: '+t,'t-ok');}
-   else{cycleTheme();P('Тема переключена → '+document.documentElement.dataset.theme,'t-ok');}},
- shader(a){GLBG.toggle(a[0]==='on'?true:a[0]==='off'?false:undefined);
-   toast('Shader: '+(GLBG.running?'ON':'OFF'));P('shader: '+(GLBG.running?'on':'off'),'t-ok');},
- matrix(a){MATRIX.toggle(a[0]==='on'?true:a[0]==='off'?false:undefined);
-   P('matrix: '+(MATRIX.running?'on':'off'),'t-ok');},
- scanlines(a){toggleScanlines(a[0]==='on'?true:a[0]==='off'?false:undefined);},
- sound(a){toggleSound(a[0]==='on'?true:a[0]==='off'?false:undefined);},
- neofetch(){P('<span class="term-pre">'+esc(NEOFETCH)+'</span>');},
- banner(){P('<span class="term-pre">'+esc(BANNER)+'</span>');},
- ls(){P(Object.keys(FILES).map(f=>f.startsWith('.')?'<span class="t-err">'+f+'</span>':'<span class="t-accent">'+f+'</span>').join('   '));},
- cat(a){const f=a[0];
-   if(!f)return P('cat: укажите файл. Например: cat about.txt','t-err');
-   if(FILES[f])P('<span class="t-out">'+esc(FILES[f]).replace(/\n/g,'<br>')+'</span>');
-   else P('cat: '+esc(f)+': No such file or directory','t-err');},
- echo(a){P(esc(a.join(' '))||'');},
- date(){P(new Date().toString());},
- uptime(){P('up '+fmtUp(performance.now()),'t-ok');},
- clear(){TERM.innerHTML='';},
- cv(){downloadCV();P('Резюме формируется… проверьте загрузки ⬇','t-ok');},
- hint(){P('1) Ctrl+K — палитра команд.','t-accent');
-   P('2) В файловой системе есть скрытый файл. ls подскажет.','t-accent');
-   P('3) Старые добрые ↑ ↑ ↓ ↓ ← → ← → B A никто не отменял.','t-accent');},
- version(){P('LixynHay OS v'+VERSION+' · build by Qwen · WebGL + Pyodide inside','t-ok');},
- sudo(a){if(a.join(' ')==='rm -rf /'){
-     P('[sudo] password for lixynhay: ********','t-out');
-     P('УДАЛЯЮ /boot…','t-err');P('УДАЛЯЮ /home/lixynhay/portfolio…','t-err');
-     document.body.classList.add('glitching');SFX.err();
-     setTimeout(()=>{document.body.classList.remove('glitching');
-       P('…','t-out');P('РЕЛАКС. Это симуляция. Файловая система цела. 😌','t-ok');SFX.ok();},1600);}
-   else P('lixynhay is not in the sudoers file. Об инциденте будет доложено. 🚨','t-err');},
- async hack(){P('Инициализация BREACH-протокола…','t-accent');
-   const steps=['Обход файрвола','Подбор ключей AES-4096','Инъекция в mainframe','Скачивание mainframe.exe','Заметание следов'];
-   for(const s of steps){const line=P(s+' …','t-out');
-     for(let i=1;i<=10;i++){line.innerHTML=s+' ['+'<span class="t-ok">'+'█'.repeat(i)+'</span>'+'░'.repeat(10-i)+'] '+(i*10)+'%';
-       await sleep(90+Math.random()*120);}SFX.key();}
-   P('ДОСТУП РАЗРЕШЁН.','t-ok');await sleep(700);
-   P('…шучу. Это просто анимация. Никакого mainframe не существует. Наверное.','t-out');}};
-const HISTORY=[];let hIdx=-1;
-async function runLine(raw){const line=raw.trim();
-  P('<span class="t-prompt">lixynhay@lixy:~$</span> <span class="t-cmd">'+esc(line)+'</span>');
-  if(!line)return;
-  HISTORY.push(line);hIdx=HISTORY.length;
-  const [cmd,...args]=line.split(/\s+/);
-  const fn=COMMANDS[cmd.toLowerCase()];
-  if(fn){SFX.key();await fn(args);}
-  else{P('команда не найдена: '+esc(cmd)+'. Введите <span class="t-accent">help</span>.','t-err');SFX.err();}}
-TIN.addEventListener('keydown',async e=>{
-  if(e.key==='Enter'){const v=TIN.value;TIN.value='';await runLine(v);}
-  else if(e.key==='ArrowUp'){e.preventDefault();if(hIdx>0)hIdx--;TIN.value=HISTORY[hIdx]||'';}
-  else if(e.key==='ArrowDown'){e.preventDefault();if(hIdx<HISTORY.length)hIdx++;TIN.value=HISTORY[hIdx]||'';}
-  else if(e.key==='Tab'){e.preventDefault();
-    const cur=TIN.value;
-    const all=[...Object.keys(COMMANDS),'cat about.txt','cat skills.sys','cat contact.ini','cat .secret'];
-    const hit=all.find(c=>c.startsWith(cur)&&c!==cur);
-    if(hit){TIN.value=hit;SFX.key();}}
-  else SFX.key();});
-TERM.addEventListener('click',()=>TIN.focus());
+  on(window, "mousemove", e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
 
-/* ---------- CV generator ---------- */
-function downloadCV(){
-  const cv=
-`════════════════════════════════════════════
-  LIXYNHAY — Embedded Engineer & Bot Dev
-════════════════════════════════════════════
-GitHub:   https://github.com/lixynhay
-Telegram: https://t.me/lixynhay
-Email:    lixynhay@gmail.com
+  function resize() {
+    w = c.clientWidth;
+    h = c.clientHeight;
+    dpr = window.devicePixelRatio || 1;
+    c.width = w * dpr;
+    c.height = h * dpr;
+    c.style.width = w + "px";
+    c.style.height = h + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    particles = Array.from({ length: 80 }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 2 + 1,
+      v: Math.random() * 0.6 + 0.2,
+      hue: Math.random() * 360
+    }));
+  }
 
-ПРОФИЛЬ
-Инженер, специализирующийся на Embedded-разработке
-и создании Telegram-ботов. Надёжные решения на стыке
-железа и софта.
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    particles.forEach(p => {
+      p.y += p.v;
+      if (p.y > h) p.y = 0;
+      const dx = mouse.x - p.x;
+      const dy = mouse.y - p.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const radius = p.r + (dist < 100 ? 20 * (1 - dist / 100) : 0);
+      ctx.beginPath();
+      ctx.fillStyle = `hsl(${p.hue}, 70%, 60%)`;
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
 
-КОМПЕТЕНЦИИ
-• Python — боты, автоматизация, тулинг
-• Kotlin — современная строгая разработка
-• ESP32 / Arduino — прошивки, датчики, протоколы
-• Telegram Bot API — боты любой сложности
-• Embedded Systems • Git • CI/CD
+  on(window, "resize", resize);
+  resize();
+  draw();
 
-── Сгенерировано автоматически на lixynhay.github.io ──
-P.S. Полная версия CV — по запросу в Telegram.`;
-  const blob=new Blob([cv],{type:'text/plain;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='CV_LixynHay.txt';a.click();URL.revokeObjectURL(a.href);
-  toast('CV_LixynHay.txt скачан ⬇');}
-
-/* ---------- command palette ---------- */
-const ACTIONS=[
- {l:'→ Главная',h:'#home',f:()=>go('#home')},
- {l:'→ Терминал',h:'#terminal',f:()=>go('#terminal')},
- {l:'→ Python Lab',h:'#python',f:()=>go('#python')},
- {l:'→ Обо мне',h:'#about',f:()=>go('#about')},
- {l:'→ Статистика',h:'#stats',f:()=>go('#stats')},
- {l:'→ Проекты',h:'#projects',f:()=>go('#projects')},
- {l:'⬇ Скачать CV',h:'generate',f:downloadCV},
- {l:'↗ GitHub',h:'open',f:()=>open(CFG.gh,'_blank')},
- {l:'↗ Telegram',h:'open',f:()=>open(CFG.tg,'_blank')},
- {l:'✉️ Написать Email',h:'open',f:()=>location.href=CFG.mail},
- {l:'◐ Сменить тему',h:'cycle',f:cycleTheme},
- {l:'▨ WebGL-шейдер: вкл/выкл',h:'fx',f:()=>{GLBG.toggle();toast('Shader: '+(GLBG.running?'ON':'OFF'));}},
- {l:'▦ Matrix: вкл/выкл',h:'fx',f:()=>MATRIX.toggle()},
- {l:'▤ Scanlines: вкл/выкл',h:'fx',f:()=>toggleScanlines()},
- {l:'♪ Звук: вкл/выкл',h:'fx',f:()=>toggleSound()},
- {l:'⌫ Очистить терминал',h:'cls',f:()=>{TERM.innerHTML='';go('#terminal');}},
-];
-const go=sel=>document.querySelector(sel)?.scrollIntoView({behavior:'smooth'});
-let palItems=[],palIdx=0;
-function renderPalette(q=''){const list=$('#palette-list');
-  palItems=ACTIONS.filter(a=>a.l.toLowerCase().includes(q.toLowerCase()));
-  palIdx=0;
-  list.innerHTML=palItems.length?palItems.map((a,i)=>
-    `<div class="palette-item${i===0?' sel':''}" data-i="${i}"><span>${esc(a.l)}</span><kbd>${esc(a.h)}</kbd></div>`).join('')
-    :'<div class="palette-empty">Ничего не найдено. Попробуйте «theme» или «shader».</div>';
-  list.querySelectorAll('.palette-item').forEach(el=>{
-    el.addEventListener('mouseenter',()=>setPalSel(+el.dataset.i));
-    el.addEventListener('click',()=>execPal(+el.dataset.i));});}
-function setPalSel(i){palIdx=i;$$('#palette-list .palette-item').forEach((el,j)=>el.classList.toggle('sel',j===i));}
-function execPal(i){const a=palItems[i];if(!a)return;closePalette();a.f();}
-function openPalette(){$('#palette').hidden=false;$('#palette-input').value='';renderPalette();
-  requestAnimationFrame(()=>$('#palette-input').focus());}
-function closePalette(){$('#palette').hidden=true;}
-$('#palette-input').addEventListener('input',e=>renderPalette(e.target.value));
-$('#palette-input').addEventListener('keydown',e=>{
-  if(e.key==='Escape')closePalette();
-  else if(e.key==='ArrowDown'){e.preventDefault();setPalSel(Math.min(palIdx+1,palItems.length-1));}
-  else if(e.key==='ArrowUp'){e.preventDefault();setPalSel(Math.max(palIdx-1,0));}
-  else if(e.key==='Enter'){e.preventDefault();execPal(palIdx);}});
-$('#palette').addEventListener('click',e=>{if(e.target.id==='palette')closePalette();});
-$('#palette-btn').addEventListener('click',openPalette);
-$('#theme-btn').addEventListener('click',cycleTheme);
-$('#cv-btn').addEventListener('click',downloadCV);
-
-/* ---------- konami ---------- */
-const KONAMI=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-let kIdx=0;
-addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette();return;}
-  if(e.key===KONAMI[kIdx]){kIdx++;
-    if(kIdx===KONAMI.length){kIdx=0;
-      document.body.classList.add('godmode');
-      MATRIX.toggle(true);
-      toast('🎮 GOD MODE ACTIVATED');SFX.ok();
-      setTimeout(()=>document.body.classList.remove('godmode'),8000);}}
-  else kIdx=0;});
-
-/* ---------- HUD ---------- */
-const T0=performance.now();
-function fmtUp(ms){const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;
-  return [h,m,ss].map(v=>String(v).padStart(2,'0')).join(':');}
-setInterval(()=>{
-  $('#clock').textContent=new Date().toLocaleTimeString('ru-RU',{hour12:false});
-  $('#uptime').textContent=fmtUp(performance.now()-T0);},1000);
-let cpu=4;setInterval(()=>{cpu=Math.max(2,Math.min(96,cpu+(Math.random()-.48)*7));
-  $('#cpu').textContent=Math.round(cpu)+'%';},1800);
-let frames=0,fLast=performance.now();
-function loop(t){frames++;
-  if(t-fLast>=1000){$('#fps').textContent=frames;frames=0;fLast=t;}
-  GLBG.frame(t);MATRIX.frame(t);requestAnimationFrame(loop);}
-
-/* ---------- reveal & nav ---------- */
-const io=new IntersectionObserver(es=>es.forEach(e=>{
-  if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}}),{threshold:.12});
-$$('.reveal').forEach(el=>io.observe(el));
-const navIO=new IntersectionObserver(es=>es.forEach(e=>{
-  if(e.isIntersecting){$$('.nav-links a').forEach(a=>
-    a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));}}),{threshold:.35});
-['home','terminal','python','about','stats','projects'].forEach(id=>{const s=document.getElementById(id);if(s)navIO.observe(s);});
-
-/* ---------- init ---------- */
-applyTheme(store.get('lixy_theme','dark'),true);
-applyScanlines();
-const glOK=GLBG.init();
-GLBG.running=glOK&&store.get('lixy_gl','1')==='1'&&!REDUCED;
-GLBG.cv.style.display=GLBG.running?'block':'none';
-if(!glOK)console.warn('WebGL недоступен — фон остаётся на matrix');
-MATRIX.init();
-$('#year').textContent=new Date().getFullYear();
-initPythonLab();
-P('LixynHay Terminal v'+VERSION+' — ядро загружено.','t-ok');
-P('Введите <span class="t-accent">help</span> для списка команд. <span class="t-out">Ctrl+K — палитра.</span>');
-requestAnimationFrame(loop);
-boot().then(()=>{heroTermLoop();roleLoop();});
-initGitHub();
+  /* ---------- 11. Dynamic year ---------- */
+  $("#year").textContent = new Date().getFullYear();
+})();
 </script>
 <noscript><style>#boot{display:none}</style><p style="padding:20px;text-align:center">Включите JavaScript — этот сайт работает на чистой магии JS.</p></noscript>
 </body>
